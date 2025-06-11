@@ -1,4 +1,10 @@
-﻿using static System.Console;
+﻿using LINQ_Challeges.Models;
+using System.ComponentModel;
+using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
+using static System.Console;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class Program
 {
@@ -6,10 +12,187 @@ public class Program
     private static void Main(string[] args)
     {
         WriteLine("Hello, LINQ\n");
-        //Challenge_0();
-        //Challenge_1();
-        //Challenge_2();
-        Challenge_3();
+        //Challenge_0();             
+        //Challenge_1();            // Filter
+        //Challenge_2();            // Sort Asc
+        //Challenge_3();            // Sort Desc
+        //Challenge_4();              // Filtering & Sorting Together
+        //Challenge_5();                  // JOINS
+        //Challenge_6();                  // GROUP BY and Aggregation
+        Challenge_7();
+    }
+
+    private static void Challenge_7()
+    {
+        var customers = new List<(int CustomerId, string Name)>
+        {
+            (1, "Alice"),
+            (2, "Bob"),
+            (3, "Charlie"),
+            (4, "David"),
+            (5, "Eve")
+        };
+
+        var orders = new List<(int OrderId, int CustomerId, DateTime OrderDate)>
+        {
+            (101, 1, DateTime.Now.AddDays(-10)),
+            (102, 1, DateTime.Now.AddDays(-20)),
+            (103, 2, DateTime.Now.AddDays(-5)),
+            (104, 3, DateTime.Now.AddDays(-15)),
+            (105, 4, DateTime.Now.AddDays(-7)),
+            (106, 4, DateTime.Now.AddDays(-30)),
+            (107, 5, DateTime.Now.AddDays(-2))
+        };
+
+        var orderLines = new List<(int OrderId, int ProductId, int Quantity)>
+        {
+            (101, 201, 2),
+            (101, 202, 1),
+            (102, 203, 5),
+            (103, 201, 3),
+            (103, 202, 2),
+            (104, 203, 4),
+            (105, 201, 1),
+            (106, 202, 6),
+            (107, 203, 7)
+        };
+
+        var products = new List<(int ProductId, string ProductName, decimal Price)>
+        {
+            (201, "Laptop", 1200),
+            (202, "Mouse", 25),
+            (203, "Keyboard", 60)
+        };
+
+        //    Task: Join, Group, Sort, and Project
+        //Write a LINQ query to:
+        //1️ Join customers, orders, and order lines
+        //2️ Group by customer to calculate:
+        //        -Total number of orders per customer
+        //        - Total amount spent per customer
+        //3️ Sort by total amount spent in descending order
+        //4️ Project only Customer Name, Order Count, and Total Spent Amount
+
+        var query = from cust in customers
+                    join order in orders on cust.CustomerId equals order.CustomerId
+                    join orderLine in orderLines on order.OrderId equals orderLine.OrderId
+                    join product in products on orderLine.ProductId equals product.ProductId
+                    group new { order, orderLine, product } by cust into orderGroup
+                    orderby orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
+                    select new
+                    {
+                        Customer = orderGroup.Key.Name,
+                        OrderCount = orderGroup.Select(x => x.order.OrderId).Count(),
+                        TotalAmountSpent = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price)
+                    };
+
+
+        foreach (var item in query)
+        {
+            WriteLine($"{item.Customer}\tTotal Orders:{item.OrderCount}\tTotal amount spent: ${item.TotalAmountSpent}");
+        }
+
+    }
+
+    private static void Challenge_6()
+    {
+        var employees = new List<(int Id, string Name, int Age, int DepartmentId)>
+        {
+            (1, "Alice", 25, 2),  // IT
+            (2, "Bob", 30, 3),    // Finance
+            (3, "Charlie", 22, 1), // HR
+            (4, "David", 40, 5),  // Sales
+            (5, "Eve", 29, 4),    // Marketing
+            (6, "Frank", 35, 2),  // IT
+            (7, "Grace", 28, 3),  // Finance
+            (8, "Hank", 45, 5),   // Sales
+            (9, "Ivy", 24, 1),    // HR
+            (10, "Jack", 32, 4)   // Marketing
+        };
+
+        var departments = new List<(int DepartmentId, string Department)>
+        {
+            (1, "HR"),
+            (2, "IT"),
+            (3, "Finance"),
+            (4, "Marketing"),
+            (5, "Sales")
+        };
+
+        // write a query to group employees by their department and calculate:
+        // 1️ Total number of employees per department
+        //2️ Average age of employees in each department
+
+        var query = from emp in employees
+                    join dept in departments on emp.DepartmentId equals dept.DepartmentId
+                    group new { emp, dept } by emp.DepartmentId into deptGroup
+                    orderby deptGroup.Key
+                    select new {
+                        DepartmentId = deptGroup.Key,
+                        Department = deptGroup.Select(x => x.dept.Department).First(),
+                        EmpCount = deptGroup.Count(),
+                        AverageAge = deptGroup.Average(x => x.emp.Age)
+                    };
+        foreach (var item in query)
+        {
+            WriteLine($"{item.Department}\tEmployee Count {item.EmpCount}\tAverage Age {item.AverageAge}");
+        }
+
+    }
+
+    private static void Challenge_5()
+    {
+        var employees = new List<(int Id, string Name, int Age, int DepartmentId)>
+        {
+            (1, "Alice", 25, 2),  // Alice → IT
+            (2, "Bob", 30, 3),    // Bob → Finance
+            (3, "Charlie", 22, 1), // Charlie → HR
+            (4, "David", 40, 5),  // David → Sales
+            (5, "Eve", 29, 4)     // Eve → Marketing
+        };
+
+        var departments = new List<(int DepartmentId, string Department)>
+        {
+            (1, "HR"),
+            (2, "IT"),
+            (3, "Finance"),
+            (4, "Marketing"),
+            (5, "Sales")
+        };
+
+        // 🚀 Task: Write a LINQ Query to Join Employees and Departments
+        // ✅ Write a LINQ query to join employees with departments using their DepartmentId.
+        // ✅ Return Employee Name, Age, and Department Name.
+        var query = from emp in employees
+                    join
+                    dept in departments on emp.DepartmentId equals dept.DepartmentId
+                    select new { 
+                        EmployeeName = emp.Name,
+                        Age = emp.Age,
+                        DepartmentName = dept.Department
+                    };
+        foreach (var emp in query)
+        {
+            WriteLine($"{emp.EmployeeName} age {emp.Age} works in {emp.DepartmentName}");
+        }
+    }
+
+    private static void Challenge_4()
+    {
+        var employees = new List<(string Name, int Age)>
+                {
+                    ("Alice", 25),
+                    ("Bob", 30),
+                    ("Charlie", 22),
+                    ("David", 40),
+                    ("Eve", 29)
+                };
+        // filter employees older than 25 and sort them in descending order by age.
+        var query = from emp in employees 
+                        where emp.Age > 25 
+                        orderby emp.Age descending 
+                    select emp;
+        Display(query);
     }
 
     private static void Challenge_3()
@@ -25,12 +208,9 @@ public class Program
 
         //  sort employees in descending order by age (oldest first).
         var query = from emp in employees orderby emp.Age descending select emp;
-        foreach (var emp in query)
-        {
-            WriteLine($"{emp.Name} - {emp.Age}");
-        }
+        Display(query);
     }
-
+    
     private static void Challenge_2()
     {
         var employees = new List<(string Name, int Age)>
@@ -44,10 +224,7 @@ public class Program
         // ❓ Task
         // Write a LINQ query to select all employees, but sort them in ascending order by age.
         var query = from  emp in employees orderby emp.Age ascending select emp;
-        foreach (var emp in query)
-        {
-            WriteLine($"{emp.Name} - {emp.Age}");
-        }
+        Display(query);
     }
 
     private static void Challenge_1()
@@ -78,6 +255,14 @@ public class Program
         foreach (var num in numbers) 
         {
             WriteLine(num);
+        }
+    }
+
+    private static void Display(IOrderedEnumerable<(string Name, int Age)> query)
+    {
+        foreach (var emp in query)
+        {
+            WriteLine($"{emp.Name} - {emp.Age}");
         }
     }
 }

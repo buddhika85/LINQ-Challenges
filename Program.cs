@@ -19,7 +19,83 @@ public class Program
         //Challenge_4();              // Filtering & Sorting Together
         //Challenge_5();                  // JOINS
         //Challenge_6();                  // GROUP BY and Aggregation
-        Challenge_7();
+        //Challenge_7();
+        Challenge_8();
+    }
+
+    private static void Challenge_8()
+    {
+        var customers = new List<(int CustomerId, string Name)>
+        {
+            (1, "Alice"),
+            (2, "Bob"),
+            (3, "Charlie"),
+            (4, "David"),
+            (5, "Eve")
+        };
+
+        var orders = new List<(int OrderId, int CustomerId, DateTime OrderDate)>
+        {
+            (101, 1, DateTime.Now.AddDays(-10)),
+            (102, 1, DateTime.Now.AddDays(-20)),
+            (103, 2, DateTime.Now.AddDays(-5)),
+            (104, 3, DateTime.Now.AddDays(-15)),
+            (105, 4, DateTime.Now.AddDays(-7)),
+            (106, 4, DateTime.Now.AddDays(-30)),
+            (107, 5, DateTime.Now.AddDays(-2))
+        };
+
+        var orderLines = new List<(int OrderId, int ProductId, int Quantity)>
+        {
+            (101, 201, 2),
+            (101, 202, 1),
+            (102, 203, 5),
+            (103, 201, 3),
+            (103, 202, 2),
+            (104, 203, 4),
+            (105, 201, 1),
+            (106, 202, 6),
+            (107, 203, 7)
+        };
+
+        var products = new List<(int ProductId, string ProductName, decimal Price)>
+        {
+            (201, "Laptop", 1200),
+            (202, "Mouse", 25),
+            (203, "Keyboard", 60)
+        };
+
+        //    Task: Join, Group, Sort, and Project
+        //Write a LINQ query to:
+        //1️ Join customers, orders, and order lines
+        //2️ Group by customer to calculate:
+        //        -Total number of orders per customer
+        //        - Total amount spent per customer
+        //3️ Sort by total amount spent in descending order
+        //4️ Project only Customer Name, Order Count, and Total Spent Amount
+        //5 Apply a HAVING filter to exclude customers who spent less than $1,000
+
+        var query = from customer in customers
+                    join order in orders on customer.CustomerId equals order.CustomerId
+                    join orderLine in orderLines on order.OrderId equals orderLine.OrderId
+                    join product in products on orderLine.ProductId equals product.ProductId
+                    group new { order, orderLine, product } by customer into orderGroup
+
+                    where orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) >= 1000            // having
+
+                    orderby orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
+                    
+                    select new { 
+                        Customer = orderGroup.Key.Name,
+                        OrderCount = orderGroup.Select(x => x.order.OrderId).Distinct().Count(),
+                        TotalAmount = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price)
+                    };
+
+        foreach (var item in query)
+        {
+            WriteLine($"{item.Customer}\tTotal Orders:{item.OrderCount}\tTotal amount spent: ${item.TotalAmount}");
+        }
+
     }
 
     private static void Challenge_7()
@@ -73,19 +149,18 @@ public class Program
         //3️ Sort by total amount spent in descending order
         //4️ Project only Customer Name, Order Count, and Total Spent Amount
 
+
         var query = from cust in customers
                     join order in orders on cust.CustomerId equals order.CustomerId
                     join orderLine in orderLines on order.OrderId equals orderLine.OrderId
                     join product in products on orderLine.ProductId equals product.ProductId
                     group new { order, orderLine, product } by cust into orderGroup
                     orderby orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
-                    select new
-                    {
+                    select new { 
                         Customer = orderGroup.Key.Name,
-                        OrderCount = orderGroup.Select(x => x.order.OrderId).Count(),
+                        OrderCount = orderGroup.Select(x => x.order).Distinct().Count(),
                         TotalAmountSpent = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price)
                     };
-
 
         foreach (var item in query)
         {

@@ -1,6 +1,8 @@
 ﻿using LINQ_Challeges.Models;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel;
 using System.Reflection.Metadata;
+using System.Runtime.Intrinsics.X86;
 using System.Text.RegularExpressions;
 using static System.Console;
 using static System.Net.Mime.MediaTypeNames;
@@ -20,7 +22,84 @@ public class Program
         //Challenge_5();                  // JOINS
         //Challenge_6();                  // GROUP BY and Aggregation
         //Challenge_7();
-        Challenge_8();
+        //Challenge_8();              // HAVING sql - linq uses where on groups, no having
+        Challenge_9();                // sub queries
+    }
+
+    private static void Challenge_9()
+    {
+        var customers = new List<(int CustomerId, string Name)>
+        {
+            (1, "Alice"),
+            (2, "Bob"),
+            (3, "Charlie"),
+            (4, "David"),
+            (5, "Eve")
+        };
+
+        var orders = new List<(int OrderId, int CustomerId, DateTime OrderDate)>
+        {
+            (101, 1, DateTime.Now.AddDays(-10)),
+            (102, 1, DateTime.Now.AddDays(-20)),
+            (103, 2, DateTime.Now.AddDays(-5)),
+            (104, 3, DateTime.Now.AddDays(-15)),
+            (105, 4, DateTime.Now.AddDays(-7)),
+            (106, 4, DateTime.Now.AddDays(-30)),
+            (107, 5, DateTime.Now.AddDays(-2))
+        };
+
+        var orderLines = new List<(int OrderId, int ProductId, int Quantity)>
+        {
+            (101, 201, 2),
+            (101, 202, 1),
+            (102, 203, 5),
+            (103, 201, 3),
+            (103, 202, 2),
+            (104, 203, 4),
+            (105, 201, 1),
+            (106, 202, 6),
+            (107, 203, 7)
+        };
+
+        var products = new List<(int ProductId, string ProductName, decimal Price)>
+        {
+            (201, "Laptop", 1200),
+            (202, "Mouse", 25),
+            (203, "Keyboard", 60)
+        };
+
+        //✅ Find customers who placed at least one order with a total of more than $2,500.
+        //✅ Use a subquery to determine order totals before filtering customers.
+        //✅ Sort by total spent in descending order.
+
+
+        //var query = from customer in customers
+        //            join order in orders on customer.CustomerId equals order.OrderId
+        //            join orderLine in orderLines on order.OrderId equals orderLine.OrderId
+        //            join product in products on orderLine.ProductId equals product.ProductId
+        //            group new { order, orderLine, product } by customer into orderGroup
+        //            select new { 
+        //                Customer = orderGroup.Key.Name,
+        //                OrderCount = orderGroup.Select(x => x.order.OrderId).Distinct().Count(),
+        //                TotalSpent = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price)
+        //            };
+
+        var query = from order in orders
+                    join orderLine in orderLines on order.OrderId equals orderLine.OrderId
+                    join product in products on orderLine.ProductId equals product.ProductId
+                    join customer in customers on order.CustomerId equals customer.CustomerId
+                    group new { orderLine, product, customer } by order into orderGroup
+                    orderby orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
+                    where orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) > 2500
+                    select new { 
+                        OrderId = orderGroup.Key.OrderId,
+                        OrderSum = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price),
+                        Customer = orderGroup.Select(x => x.customer.Name).First(),
+                    };
+        foreach (var item in query)
+        {
+            WriteLine($"Order {item.OrderId}\t${item.OrderSum}\tby {item.Customer}");
+        }
     }
 
     private static void Challenge_8()

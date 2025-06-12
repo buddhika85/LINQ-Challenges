@@ -1,12 +1,4 @@
-﻿using LINQ_Challeges.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.ComponentModel;
-using System.Reflection.Metadata;
-using System.Runtime.Intrinsics.X86;
-using System.Text.RegularExpressions;
-using static System.Console;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using static System.Console;
 
 public class Program
 {
@@ -23,7 +15,78 @@ public class Program
         //Challenge_6();                  // GROUP BY and Aggregation
         //Challenge_7();
         //Challenge_8();              // HAVING sql - linq uses where on groups, no having
-        Challenge_9();                // sub queries
+        //Challenge_9();                // having
+        //Challenge_10();               // sub queries
+    }
+
+    private static void Challenge_10()
+    {
+        var customers = new List<(int CustomerId, string Name)>
+        {
+            (1, "Alice"),
+            (2, "Bob"),
+            (3, "Charlie"),
+            (4, "David"),
+            (5, "Eve")
+        };
+
+        var orders = new List<(int OrderId, int CustomerId, DateTime OrderDate)>
+        {
+            (101, 1, DateTime.Now.AddDays(-10)),
+            (102, 1, DateTime.Now.AddDays(-20)),
+            (103, 2, DateTime.Now.AddDays(-5)),
+            (104, 3, DateTime.Now.AddDays(-15)),
+            (105, 4, DateTime.Now.AddDays(-7)),
+            (106, 4, DateTime.Now.AddDays(-30)),
+            (107, 5, DateTime.Now.AddDays(-2))
+        };
+
+        var orderLines = new List<(int OrderId, int ProductId, int Quantity)>
+        {
+            (101, 201, 2),
+            (101, 202, 1),
+            (102, 203, 5),
+            (103, 201, 3),
+            (103, 202, 2),
+            (104, 203, 4),
+            (105, 201, 1),
+            (106, 202, 6),
+            (107, 203, 7)
+        };
+
+        var products = new List<(int ProductId, string ProductName, decimal Price)>
+        {
+            (201, "Laptop", 1200),
+            (202, "Mouse", 25),
+            (203, "Keyboard", 60)
+        };
+
+        // query to filter customers who have at least TWO high-value orders > $2,500.
+        var query = from customer in customers
+                    join order in orders on customer.CustomerId equals order.CustomerId
+                    join orderLine in orderLines on order.OrderId equals orderLine.OrderId
+                    join product in products on orderLine.ProductId equals product.ProductId
+                    group new { order, orderLine, product } by customer into orderGroup
+
+                    let highestValuedOrders
+                        = orderGroup.GroupBy(x => x.order.OrderId)
+                            .Count(order => order.Sum(x => x.orderLine.Quantity * x.product.Price) > 2500)
+
+                    where highestValuedOrders >= 1
+
+
+                    orderby
+                    orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
+
+                    select new
+                    {
+                        Customer = orderGroup.Key.Name,
+                        OrderCount = orderGroup.Select(x => x.order.OrderId).Distinct().Count()
+                    };
+        foreach (var item in query)
+        {
+            WriteLine($"Customer {item.Customer}\t{item.OrderCount}");
+        }
     }
 
     private static void Challenge_9()
@@ -91,7 +154,8 @@ public class Program
                     group new { orderLine, product, customer } by order into orderGroup
                     orderby orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
                     where orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) > 2500
-                    select new { 
+                    select new
+                    {
                         OrderId = orderGroup.Key.OrderId,
                         OrderSum = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price),
                         Customer = orderGroup.Select(x => x.customer.Name).First(),
@@ -163,8 +227,9 @@ public class Program
                     where orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) >= 1000            // having
 
                     orderby orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
-                    
-                    select new { 
+
+                    select new
+                    {
                         Customer = orderGroup.Key.Name,
                         OrderCount = orderGroup.Select(x => x.order.OrderId).Distinct().Count(),
                         TotalAmount = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price)
@@ -235,7 +300,8 @@ public class Program
                     join product in products on orderLine.ProductId equals product.ProductId
                     group new { order, orderLine, product } by cust into orderGroup
                     orderby orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price) descending
-                    select new { 
+                    select new
+                    {
                         Customer = orderGroup.Key.Name,
                         OrderCount = orderGroup.Select(x => x.order).Distinct().Count(),
                         TotalAmountSpent = orderGroup.Sum(x => x.orderLine.Quantity * x.product.Price)
@@ -281,7 +347,8 @@ public class Program
                     join dept in departments on emp.DepartmentId equals dept.DepartmentId
                     group new { emp, dept } by emp.DepartmentId into deptGroup
                     orderby deptGroup.Key
-                    select new {
+                    select new
+                    {
                         DepartmentId = deptGroup.Key,
                         Department = deptGroup.Select(x => x.dept.Department).First(),
                         EmpCount = deptGroup.Count(),
@@ -320,7 +387,8 @@ public class Program
         var query = from emp in employees
                     join
                     dept in departments on emp.DepartmentId equals dept.DepartmentId
-                    select new { 
+                    select new
+                    {
                         EmployeeName = emp.Name,
                         Age = emp.Age,
                         DepartmentName = dept.Department
@@ -342,9 +410,9 @@ public class Program
                     ("Eve", 29)
                 };
         // filter employees older than 25 and sort them in descending order by age.
-        var query = from emp in employees 
-                        where emp.Age > 25 
-                        orderby emp.Age descending 
+        var query = from emp in employees
+                    where emp.Age > 25
+                    orderby emp.Age descending
                     select emp;
         Display(query);
     }
@@ -364,7 +432,7 @@ public class Program
         var query = from emp in employees orderby emp.Age descending select emp;
         Display(query);
     }
-    
+
     private static void Challenge_2()
     {
         var employees = new List<(string Name, int Age)>
@@ -377,7 +445,7 @@ public class Program
                 };
         // ❓ Task
         // Write a LINQ query to select all employees, but sort them in ascending order by age.
-        var query = from  emp in employees orderby emp.Age ascending select emp;
+        var query = from emp in employees orderby emp.Age ascending select emp;
         Display(query);
     }
 
@@ -396,7 +464,7 @@ public class Program
         // Return their names in a new list.
 
         var query = from emp in employees where emp.Age > 25 select emp.Name;
-        foreach(var empName in query)
+        foreach (var empName in query)
         {
             WriteLine($"{empName}");
         }
@@ -406,7 +474,7 @@ public class Program
     {
         var numbers = new List<int> { 1, 2, 3, 4, 5 };
         var query = from num in numbers select num;
-        foreach (var num in numbers) 
+        foreach (var num in numbers)
         {
             WriteLine(num);
         }

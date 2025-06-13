@@ -1,4 +1,6 @@
-﻿using static System.Console;
+﻿using System.Runtime.ConstrainedExecution;
+using System.Text.RegularExpressions;
+using static System.Console;
 
 public class Program
 {
@@ -17,6 +19,104 @@ public class Program
         //Challenge_8();              // HAVING sql - linq uses where on groups, no having
         //Challenge_9();                // having
         //Challenge_10();               // sub queries
+
+        Challenge_11();             // mix
+    }
+
+    private static void Challenge_11()
+    {
+        var employees = new List<(int EmployeeId, string Name, int DepartmentId)>
+        {
+            (1, "Alice", 1),
+            (2, "Bob", 2),
+            (3, "Charlie", 1),
+            (4, "David", 3),
+            (5, "Eve", 2),
+            (6, "Frank", 1),
+            (7, "Grace", 3)
+        };
+
+        var departments = new List<(int DepartmentId, string DepartmentName)>
+        {
+            (1, "HR"),
+            (2, "IT"),
+            (3, "Finance")
+        };
+
+        var salaries = new List<(int EmployeeId, decimal Salary)>
+        {
+            (1, 6000),
+            (2, 7500),
+            (3, 5800),
+            (4, 9000),
+            (5, 7200),
+            (6, 6200),
+            (7, 8800)
+        };
+
+        // Write a LINQ query to JOIN employees with departments, returning:
+        //✅ Employee Name
+        //✅ Department Name
+        //✅ Salary
+        // Sort the results by salary in descending order.
+        var query = from emp in employees
+                    join dept in departments on emp.DepartmentId equals dept.DepartmentId
+                    join salary in salaries on emp.EmployeeId equals salary.EmployeeId
+                    orderby salary.Salary descending
+                    select new
+                    {
+                        Employee = emp.Name,
+                        Salary = salary.Salary,
+                        Department = dept.DepartmentName
+                    };
+        //foreach (var item in query)
+        //{
+        //    WriteLine($"{item.Employee}\t{item.Salary}\t{item.Department}");
+        //}
+
+
+        // Average Salary Per Department
+        //Modify the query to GROUP employees by department and calculate:
+        //✅ Total number of employees per department
+        //✅ Average salary in each department
+        //Sort results by average salary in descending order.
+        var query2 = from emp in employees
+                     join dept in departments on emp.DepartmentId equals dept.DepartmentId
+                     join salary in salaries on emp.EmployeeId equals salary.EmployeeId
+                     group new { emp, salary } by new { dept } into deptGroup
+                     orderby deptGroup.Average(x => x.salary.Salary) descending
+                     select new
+                     {
+                         Department = deptGroup.Key.dept.DepartmentName,
+                         EmployeeCount = deptGroup.Select(x => x.emp.EmployeeId).Distinct().Count(),
+                         AvgSalary = deptGroup.Average(x => x.salary.Salary)
+                     };
+        foreach (var item in query2)
+        {
+            WriteLine($"{item.Department}\t{item.EmployeeCount} Employees\t${item.AvgSalary}");
+        }
+        WriteLine();
+
+        // Task 3: Filtering High-Salary Departments Using Subqueries
+        // Modify the query to ONLY show departments where the average salary is greater than $7,000.
+        var query3 = from emp in employees
+                     join dept in departments on emp.DepartmentId equals dept.DepartmentId
+                     join salary in salaries on emp.EmployeeId equals salary.EmployeeId
+                     group new { emp, salary } by new { dept } into deptGroup
+
+                     where deptGroup.Average(x => x.salary.Salary) > 7000
+                     orderby deptGroup.Average(x => x.salary.Salary) descending
+
+                     select new
+                     {
+                         Department = deptGroup.Key.dept.DepartmentName,
+                         EmployeeCount = deptGroup.Select(x => x.emp.EmployeeId).Distinct().Count(),
+                         AverageSalary = deptGroup.Average(x => x.salary.Salary)
+                     };
+        foreach (var item in query3)
+        {
+            WriteLine($"{item.Department}\t{item.EmployeeCount} Employees\t${item.AverageSalary}");
+        }
     }
 
     private static void Challenge_10()

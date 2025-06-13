@@ -117,6 +117,55 @@ public class Program
         {
             WriteLine($"{item.Department}\t{item.EmployeeCount} Employees\t${item.AverageSalary}");
         }
+        WriteLine();
+
+        // Task 4 - same as task 3 using let
+        var query4 = from emp in employees
+                     join dept in departments on emp.DepartmentId equals dept.DepartmentId
+                     join salary in salaries on emp.EmployeeId equals salary.EmployeeId
+                     group new { emp, salary } by new { dept } into deptGroup
+
+                     let avgSalary = deptGroup.Average(x => x.salary.Salary)
+
+                     where avgSalary > 7000
+                     orderby avgSalary descending
+
+                     select new
+                     {
+                         Department = deptGroup.Key.dept.DepartmentName,
+                         EmployeeCount = deptGroup.Select(x => x.emp.EmployeeId).Distinct().Count(),
+                         AverageSalary = avgSalary
+                     };
+        foreach (var item in query4)
+        {
+            WriteLine($"{item.Department}\t{item.EmployeeCount} Employees\t${item.AverageSalary}");
+        }
+        WriteLine();
+
+
+        var query5 = from emp in employees
+                     join dept in departments on emp.DepartmentId equals dept.DepartmentId
+                     join salary in salaries on emp.EmployeeId equals salary.EmployeeId
+                     group new { emp, salary } by new { dept } into deptGroup
+
+                     let avgSalary = deptGroup.Average(x => x.salary.Salary)
+                     let department = deptGroup.Key.dept.DepartmentName
+                     let employeeCount = deptGroup.Select(x => x.emp.EmployeeId).Distinct().Count()
+
+                     where avgSalary > 7000
+                     orderby avgSalary descending
+
+                     select new
+                     {
+                         Department = department,
+                         EmployeeCount = employeeCount,
+                         AverageSalary = avgSalary
+                     };
+        foreach (var item in query5)
+        {
+            WriteLine($"{item.Department}\t{item.EmployeeCount} Employees\t${item.AverageSalary}");
+        }
+
     }
 
     private static void Challenge_10()

@@ -1,6 +1,10 @@
-﻿using System.Runtime.ConstrainedExecution;
+﻿using LINQ_Challeges.Models;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.Intrinsics.X86;
 using System.Text.RegularExpressions;
 using static System.Console;
+using static System.Reflection.Metadata.BlobBuilder;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class Program
 {
@@ -20,7 +24,67 @@ public class Program
         //Challenge_9();                // having
         //Challenge_10();               // sub queries
 
-        Challenge_11();             // mix
+        //Challenge_11();             // mix
+        Challenge_12();
+    }
+
+    private static void Challenge_12()
+    {
+        var books = new List<(int BookId, string Title, string Genre)>
+        {
+            (1, "C# in Depth", "Programming"),
+            (2, "Clean Code", "Programming"),
+            (3, "The Pragmatic Programmer", "Programming"),
+            (4, "Atomic Habits", "Self-Help"),
+            (5, "Deep Work", "Self-Help"),
+            (6, "Harry Potter", "Fiction"),
+            (7, "The Lord of the Rings", "Fiction")
+        };
+
+        var borrowers = new List<(int BorrowerId, string Name)>
+        {
+            (101, "Alice"),
+            (102, "Bob"),
+            (103, "Charlie"),
+            (104, "David"),
+            (105, "Eve")
+        };
+
+        var transactions = new List<(int TransactionId, int BorrowerId, int BookId, DateTime BorrowDate)>
+        {
+            (201, 101, 1, DateTime.Now.AddDays(-30)), // Alice borrowed "C# in Depth"
+            (202, 101, 2, DateTime.Now.AddDays(-15)), // Alice borrowed "Clean Code"
+            (203, 102, 4, DateTime.Now.AddDays(-40)), // Bob borrowed "Atomic Habits"
+            (204, 103, 5, DateTime.Now.AddDays(-10)), // Charlie borrowed "Deep Work"
+            (205, 104, 6, DateTime.Now.AddDays(-25)), // David borrowed "Harry Potter"
+            (206, 104, 7, DateTime.Now.AddDays(-5)),  // David borrowed "The Lord of the Rings"
+            (207, 105, 3, DateTime.Now.AddDays(-20))  // Eve borrowed "The Pragmatic Programmer"
+        };
+
+        //🚀 Task 1: Books Borrowed Per Genre
+        //✅ JOIN books and transactions
+        //✅ GROUP books by Genre
+        //✅ COUNT how many times each genre was borrowed
+        //✅ Use let to store computed borrow count
+        //✅ ORDER BY borrow count in descending order
+        var query = from book in books
+                    join transaction in transactions on book.BookId equals transaction.BookId
+                    group new { transaction } by book.Genre into genreGroup
+
+                    let borrowalCount = genreGroup.Select(x => x.transaction.TransactionId).Count()
+                    orderby borrowalCount descending
+
+                    select new
+                    {
+                        Genre = genreGroup.Key,
+                        Count = borrowalCount
+                    };
+
+        foreach (var item in query)
+        {
+            WriteLine($"{item.Genre}\t{item.Count}");
+        }
+
     }
 
     private static void Challenge_11()

@@ -1,4 +1,5 @@
 ﻿using LINQ_Challeges.Models;
+using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.Intrinsics.X86;
 using System.Text.RegularExpressions;
@@ -54,6 +55,7 @@ public class Program
         {
             (201, 101, 1, DateTime.Now.AddDays(-30)), // Alice borrowed "C# in Depth"
             (202, 101, 2, DateTime.Now.AddDays(-15)), // Alice borrowed "Clean Code"
+            (202, 101, 2, DateTime.Now.AddDays(-15)), // Alice borrowed "Clean Code"
             (203, 102, 4, DateTime.Now.AddDays(-40)), // Bob borrowed "Atomic Habits"
             (204, 103, 5, DateTime.Now.AddDays(-10)), // Charlie borrowed "Deep Work"
             (205, 104, 6, DateTime.Now.AddDays(-25)), // David borrowed "Harry Potter"
@@ -71,7 +73,7 @@ public class Program
                     join transaction in transactions on book.BookId equals transaction.BookId
                     group new { transaction } by book.Genre into genreGroup
 
-                    let borrowalCount = genreGroup.Select(x => x.transaction.TransactionId).Count()
+                    let borrowalCount = genreGroup.Count()         //genreGroup.Select(x => x.transaction.TransactionId).Count()
                     orderby borrowalCount descending
 
                     select new
@@ -84,7 +86,56 @@ public class Program
         {
             WriteLine($"{item.Genre}\t{item.Count}");
         }
+        WriteLine();
 
+        //🚀 Task 2: Borrowers Who Borrowed Multiple Books
+        //✅ JOIN borrowers, transactions, and books
+        //✅ GROUP by Borrower Name
+        //✅ COUNT total books borrowed
+        //✅ **FILTER borrowers who borrowed at least 2 books
+        //✅ Sort borrowers by total borrowed in descending order
+        //✅ Use let to store computed borrow count
+        var query2 = from transaction in transactions
+                     join borrower in borrowers on transaction.BorrowerId equals borrower.BorrowerId
+                     group new { transaction } by borrower into borrowersGroup
+
+                     let countOfTransactions = borrowersGroup.Count()   // borrowersGroup.Select(x => x.transaction.TransactionId).Count()
+
+
+                     orderby countOfTransactions descending
+
+                     select new
+                     {
+                         Borrower = borrowersGroup.Key.Name,
+                         CountOfTransactions = countOfTransactions
+                     };
+        foreach (var item in query2)
+        {
+            WriteLine($"{item.Borrower}\t{item.CountOfTransactions}");
+        }
+        WriteLine();
+
+        // Task 3: Most Popular Book
+        //✅ JOIN books and transactions
+        //✅ GROUP by Book Title
+        //✅ COUNT how many times each book was borrowed
+        //✅ Use let to store borrow count
+        //✅ Retrieve the most borrowed book using Max()
+
+        var query3 = (from book in books
+                      join transaction in transactions on book.BookId equals transaction.BookId
+                      group new { transaction } by book into bookGroup
+
+                      let borrowalsMaxCount = bookGroup.Count()
+
+                      orderby borrowalsMaxCount descending
+                      select new
+                      {
+                          Title = bookGroup.Key.Title,
+                          Count = borrowalsMaxCount
+                      }).FirstOrDefault();
+
+        WriteLine($"Most popular book is {query3?.Title} and its borrowals count is {query3?.Count}");
     }
 
     private static void Challenge_11()

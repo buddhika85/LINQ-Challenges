@@ -1,11 +1,8 @@
 ﻿using LINQ_Challeges.Models;
-using System.Collections.Generic;
-using System.Runtime.ConstrainedExecution;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Runtime.Intrinsics.X86;
 using System.Text.RegularExpressions;
 using static System.Console;
-using static System.Reflection.Metadata.BlobBuilder;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class Program
 {
@@ -26,7 +23,112 @@ public class Program
         //Challenge_10();               // sub queries
 
         //Challenge_11();             // mix
-        Challenge_12();
+        //Challenge_12();
+        Challenge_13();
+    }
+
+    private static void Challenge_13()
+    {
+        var employees = new List<(int EmployeeId, string Name)>
+        {
+            (1, "Alice"),
+            (2, "Bob"),
+            (3, "Charlie"),
+            (4, "David"),
+            (5, "Eve")
+        };
+
+        var projects = new List<(int ProjectId, string ProjectName)>
+        {
+            (101, "E-Commerce App"),
+            (102, "AI Chatbot"),
+            (103, "Finance Dashboard")
+        };
+
+        var employeeProjects = new List<(int EmployeeId, int ProjectId, int HoursWorked)>
+        {
+            (1, 101, 120),
+            (1, 102, 80),
+            (2, 101, 100),
+            (2, 103, 95),
+            (3, 102, 110),
+            (4, 103, 130),
+            (5, 101, 70),
+            (5, 102, 85)
+        };
+
+        var performanceReviews = new List<(int EmployeeId, int Year, int Rating)>
+        {
+            (1, 2023, 4),
+            (1, 2024, 5),
+            (2, 2023, 3),
+            (2, 2024, 4),
+            (3, 2023, 5),
+            (3, 2024, 5),
+            (4, 2023, 4),
+            (4, 2024, 4),
+            (5, 2023, 3),
+            (5, 2024, 2)
+        };
+
+        //🚀 Task 1: Top Employees Based on Average Rating
+        //✅ JOIN employees with performance reviews
+        //✅ GROUP by employee
+        //✅ Calculate average rating
+        //✅ Use let to store computed rating
+        //✅ FILTER employees whose average rating is above 4
+        var topEmployees = from emp in employees
+                           join review in performanceReviews on emp.EmployeeId equals review.EmployeeId
+                           group new { review } by emp into reviewsGroup
+
+                           let avgRating = reviewsGroup.Average(x => x.review.Rating)
+
+                           orderby avgRating descending
+                           where avgRating > 4
+
+                           select new
+                           {
+                               Employee = reviewsGroup.Key.Name,
+                               AvgRating = avgRating
+                           };
+        foreach (var item in topEmployees)
+        {
+            WriteLine($"{item.Employee}\t{item.AvgRating}");
+        }
+        WriteLine();
+
+        // 🚀 Task 2: Most Dedicated Employees
+        //✅ JOIN employees with projects
+        //✅ GROUP by employee
+        //✅ Calculate total hours worked across all projects
+        //✅ FILTER employees who worked more than 200 hours total
+        //✅ Use let to store hours worked
+        //✅ ORDER BY hours in descending order
+        var dedicatedEmps = from emp in employees
+                            join empProjects in employeeProjects on emp.EmployeeId equals empProjects.EmployeeId
+                            group new { empProjects } by emp into projGroup
+
+                            let totalHoursWrkd = projGroup.Sum(x => x.empProjects.HoursWorked)
+
+                            where totalHoursWrkd > 200
+                            orderby totalHoursWrkd descending
+
+                            select new
+                            {
+                                Employee = projGroup.Key.Name,
+                                TotalHrsWrkd = totalHoursWrkd
+                            };
+        foreach (var item in dedicatedEmps)
+        {
+            WriteLine($"{item.Employee}\t{item.TotalHrsWrkd}");
+        }
+        WriteLine();
+
+        //🚀 Task 3: Employees Who Are BOTH High Performers &Hard Workers
+        //✅ Combine results from Task 1 and Task 2
+        //✅ Use a subquery to filter employees appearing in both datasets
+        //✅ Retrieve only employees who worked over 200 hours AND have an average rating above 4
+
     }
 
     private static void Challenge_12()

@@ -1,4 +1,5 @@
-﻿using static System.Console;
+﻿using System.Linq;
+using static System.Console;
 
 public class Program
 {
@@ -22,8 +23,109 @@ public class Program
         //Challenge_12();             // mix
         //Challenge_13();             // mix
 
-        Challenge_14();                 // mix 
+        //Challenge_14();                 // mix 
+        Challenge_15();                   // pagination w
 
+    }
+
+    private static void Challenge_15()
+    {
+        var employees = new List<(int EmployeeId, string Name)>
+        {
+            (1, "Alice"), (2, "Bob"), (3, "Charlie"), (4, "David"), (5, "Eve"),
+            (6, "Frank"), (7, "Grace"), (8, "Hank"), (9, "Ivy"), (10, "Jack")
+        };
+
+        var projects = new List<(int ProjectId, string ProjectName)>
+        {
+            (101, "E-Commerce App"), (102, "AI Chatbot"), (103, "Finance Dashboard"),
+            (104, "Cloud Migration"), (105, "Cybersecurity Audit")
+        };
+
+        var employeeProjects = new List<(int EmployeeId, int ProjectId, int HoursWorked)>
+        {
+            (1, 101, 120), (1, 102, 80), (1, 104, 90),
+            (2, 101, 100), (2, 103, 95), (2, 105, 120),
+            (3, 102, 110), (3, 105, 75),
+            (4, 103, 130), (4, 104, 100),
+            (5, 101, 70), (5, 102, 85), (5, 105, 60),
+            (6, 103, 140), (7, 102, 95), (8, 105, 110),
+            (9, 104, 125), (10, 101, 90), (10, 105, 80)
+        };
+
+        var performanceReviews = new List<(int EmployeeId, int Year, int Rating)>
+        {
+            (1, 2023, 4), (1, 2024, 5), (1, 2025, 5),
+            (2, 2023, 3), (2, 2024, 4), (2, 2025, 4),
+            (3, 2023, 5), (3, 2024, 5), (3, 2025, 5),
+            (4, 2023, 4), (4, 2024, 4), (4, 2025, 3),
+            (5, 2023, 3), (5, 2024, 2), (5, 2025, 4),
+            (6, 2023, 4), (6, 2024, 4), (7, 2023, 5),
+            (8, 2024, 3), (8, 2025, 4), (9, 2025, 5),
+            (10, 2023, 4), (10, 2024, 5)
+        };
+
+        //🚀 Task 3: Employees Who Are BOTH High Performers & Hard Workers
+        //✅ Combine results from Task 1 and Task 2
+        //✅ Use a subquery to filter employees appearing in both datasets
+        //✅ Retrieve only employees who worked over 200 hours AND have an average rating above 4
+
+        var pagedQuery = from emp in employees
+                         join review in performanceReviews on emp.EmployeeId equals review.EmployeeId
+                         join project in employeeProjects on emp.EmployeeId equals project.EmployeeId
+                         group new { review, project } by emp into empGroup
+
+                         let totalHrsWrkd = empGroup.Sum(x => x.project.HoursWorked)
+                         let avgRating = Math.Round(empGroup.Average(x => x.review.Rating), 1)
+                         let minRating = empGroup.Min(x => x.review.Rating)
+                         let maxRating = empGroup.Max(x => x.review.Rating)
+
+                         orderby totalHrsWrkd descending,
+                                    avgRating descending
+
+                         where totalHrsWrkd > 200 && avgRating > 4
+
+                         select new
+                         {
+                             Employee = empGroup.Key.Name,
+                             AvgRating = avgRating,
+                             MinRating = minRating,
+                             MaxRating = maxRating,
+                             TotalHrsWrkd = totalHrsWrkd,
+                         };
+        foreach (var item in pagedQuery)
+        {
+            WriteLine($"{item.Employee}\t\t{item.TotalHrsWrkd} hrs\t\t{item.AvgRating} Avg\t\t{item.MinRating} LOW\t\t{item.MaxRating} HIGH");
+        }
+
+        WriteLine("\n------------------------------------Displaying Paged Results------------------------------------");
+        var goMore = true;
+        var resultsPerPage = 2;
+        var pageNumber = 0;
+        while (goMore)
+        {
+            var result = pagedQuery.Skip(pageNumber++ * resultsPerPage).Take(resultsPerPage);
+            if (!result.Any())
+            {
+                goMore = false;
+            }
+            else
+            {
+                WriteLine($"\n\nPAGE [ {pageNumber} ]");
+                foreach (var item in result)
+                {
+                    WriteLine($"{item.Employee}\t\t{item.TotalHrsWrkd} hrs\t\t{item.AvgRating} Avg\t\t{item.MinRating} LOW\t\t{item.MaxRating} HIGH");
+                }
+            }
+        }
+    }
+
+    private static void Display(IEnumerable<(string Employee, double AvgRating, double MinRating, double MaxRating, int TotalHrsWrkd)> enumerable)
+    {
+        foreach (var item in enumerable)
+        {
+            WriteLine($"{item.Employee}\t\t{item.TotalHrsWrkd} hrs\t\t{item.AvgRating} Avg\t\t{item.MinRating} LOW\t\t{item.MaxRating} HIGH");
+        }
     }
 
     private static void Challenge_14()

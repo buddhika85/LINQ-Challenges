@@ -1,8 +1,4 @@
-﻿using LINQ_Challeges.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Runtime.Intrinsics.X86;
-using System.Text.RegularExpressions;
-using static System.Console;
+﻿using static System.Console;
 
 public class Program
 {
@@ -110,7 +106,7 @@ public class Program
 
                             let totalHoursWrkd = projGroup.Sum(x => x.empProjects.HoursWorked)
 
-                            where totalHoursWrkd > 200
+                            where totalHoursWrkd >= 200
                             orderby totalHoursWrkd descending
 
                             select new
@@ -128,6 +124,26 @@ public class Program
         //✅ Combine results from Task 1 and Task 2
         //✅ Use a subquery to filter employees appearing in both datasets
         //✅ Retrieve only employees who worked over 200 hours AND have an average rating above 4
+        var goodEmps = from emp in employees
+                       join review in performanceReviews on emp.EmployeeId equals review.EmployeeId
+                       join empProjs in employeeProjects on emp.EmployeeId equals empProjs.EmployeeId
+                       group new { review, empProjs } by emp into ratingwHoursGroup
+
+                       let avgRating = ratingwHoursGroup.Select(x => x.review).Distinct().Average(x => x.Rating)
+                       let totalHours = ratingwHoursGroup.Select(x => x.empProjs).Distinct().Sum(x => x.HoursWorked)
+
+                       where totalHours >= 200 && avgRating > 4
+
+                       select new
+                       {
+                           Employee = ratingwHoursGroup.Key.Name,
+                           AvgRating = avgRating,
+                           TotalHours = totalHours,
+                       };
+        foreach (var item in goodEmps)
+        {
+            WriteLine($"{item.Employee}\tTotal Hours Worked: {item.TotalHours}\t\tAvg Rating: {item.AvgRating}");
+        }
 
     }
 

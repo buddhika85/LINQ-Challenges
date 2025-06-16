@@ -124,7 +124,7 @@ public class Program
         }
         WriteLine();
 
-        //🚀 Task 3: Employees Who Are BOTH High Performers &Hard Workers
+        //🚀 Task 3: Employees Who Are BOTH High Performers & Hard Workers
         //✅ Combine results from Task 1 and Task 2
         //✅ Use a subquery to filter employees appearing in both datasets
         //✅ Retrieve only employees who worked over 200 hours AND have an average rating above 4

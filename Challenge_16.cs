@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Intrinsics.X86;
+﻿using Azure;
 using static System.Console;
 namespace LINQ_Challeges;
 
@@ -34,7 +32,9 @@ public class Challenge_16
     public Challenge_16()
     {
         //HighestSpenders_T1();
-        HighestSpendersAbove5000_T2();
+        //HighestSpendersAbove5000_T2();
+        //HighestPurchaseOfCust_T3();
+        DisplayPaginatedResults_T4();
     }
 
     // 🚀 Task 1: Total Sales Per Customer
@@ -99,8 +99,9 @@ public class Challenge_16
 
                                let totalSpent = custGroup.Sum(x => x.sale.Quantity * x.prod.Price)
 
+                               where totalSpent >= 5000
                                orderby totalSpent descending
-                               where totalSpent >= 3000
+
                                select new
                                {
                                    Customer = custGroup.Key.Name,
@@ -118,5 +119,85 @@ public class Challenge_16
     //✅ Use a subquery to find the highest single purchase per customer
     //✅ Only include purchases worth more than $2,000
     //✅ Sort by purchase amount descending
+    public void HighestPurchaseOfCust_T3()
+    {
+        var highestPurchaseOfCust = from cust in customers
+                                    join sale in sales on cust.CustomerId equals sale.CustomerId
+                                    join product in products on sale.ProductId equals product.ProductId
+                                    group new { sale, product } by cust into custGroup
+
+                                    let highestPurchase = custGroup.Max(x => x.sale.Quantity * x.product.Price)
+                                    let lowestPurchase = custGroup.Min(x => x.sale.Quantity * x.product.Price)
+                                    let avgPurchase = custGroup.Average(x => x.sale.Quantity * x.product.Price)
+                                    let sumPurchases = custGroup.Sum(x => x.sale.Quantity * x.product.Price)
+
+                                    orderby highestPurchase descending
+
+                                    where highestPurchase > 2000
+
+                                    select new
+                                    {
+                                        Customer = custGroup.Key.Name,
+                                        MaxPurchase = highestPurchase,
+                                        MinPurchase = lowestPurchase,
+                                        AvgPurchase = Math.Round(avgPurchase, 1),
+                                        SumPurchase = sumPurchases
+                                    };
+
+        foreach (var item in highestPurchaseOfCust)
+        {
+            WriteLine($"{item.Customer}\t\tMax ${item.MaxPurchase}\tMin ${item.MinPurchase}\tAvg ${item.AvgPurchase}\tTotal ${item.SumPurchase}");
+        }
+    }
+
+    //🚀 Task 4: Apply Pagination to Sales Results
+    //✅ Display sales in pages(Skip() & Take())
+    //✅ **Show only 2 records per page
+    //✅ Allow dynamic page navigation
+    public void DisplayPaginatedResults_T4()
+    {
+        var highestPurchaseOfCust = from cust in customers
+                                    join sale in sales on cust.CustomerId equals sale.CustomerId
+                                    join product in products on sale.ProductId equals product.ProductId
+                                    group new { sale, product } by cust into custGroup
+
+                                    let highestPurchase = custGroup.Max(x => x.sale.Quantity * x.product.Price)
+                                    let lowestPurchase = custGroup.Min(x => x.sale.Quantity * x.product.Price)
+                                    let avgPurchase = custGroup.Average(x => x.sale.Quantity * x.product.Price)
+                                    let sumPurchases = custGroup.Sum(x => x.sale.Quantity * x.product.Price)
+
+                                    orderby highestPurchase descending
+
+                                    where highestPurchase > 2000
+
+                                    select new
+                                    {
+                                        Customer = custGroup.Key.Name,
+                                        MaxPurchase = highestPurchase,
+                                        MinPurchase = lowestPurchase,
+                                        AvgPurchase = Math.Round(avgPurchase, 1),
+                                        SumPurchase = sumPurchases
+                                    };
+
+        var goMore = true;
+        var pageNumberDisplayed = 0;
+        var resultsPerPage = 2;
+        while (goMore)
+        {
+            var pageResult = highestPurchaseOfCust.Skip(pageNumberDisplayed * resultsPerPage).Take(resultsPerPage);
+            if (pageResult.Any())
+            {
+                WriteLine($"\nPage [ {++pageNumberDisplayed} ]");
+                foreach (var item in pageResult)
+                {
+                    WriteLine($"{item.Customer}\t\tMax ${item.MaxPurchase}\tMin ${item.MinPurchase}\tAvg ${item.AvgPurchase}\tTotal ${item.SumPurchase}");
+                }
+            }
+            else
+            {
+                goMore = false;
+            }
+        }
+    }
 
 }

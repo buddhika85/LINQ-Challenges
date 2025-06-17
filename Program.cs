@@ -1,4 +1,10 @@
-﻿using System.Linq;
+﻿using Azure;
+using LINQ_Challeges;
+using LINQ_Challeges.Models;
+using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.Intrinsics.X86;
+using System.Text.RegularExpressions;
 using static System.Console;
 
 public class Program
@@ -24,8 +30,9 @@ public class Program
         //Challenge_13();             // mix
 
         //Challenge_14();                 // mix 
-        Challenge_15();                   // pagination w
+        //Challenge_15();                   // pagination
 
+        new Challenge_16();
     }
 
     private static void Challenge_15()
@@ -69,6 +76,9 @@ public class Program
         //✅ Combine results from Task 1 and Task 2
         //✅ Use a subquery to filter employees appearing in both datasets
         //✅ Retrieve only employees who worked over 200 hours AND have an average rating above 4
+        // Fetches only 2 employees per page
+        //✅ Uses variables for pageNumber and pageSize
+        //✅ Applies.Skip(pageNumber * pageSize).Take(pageSize) to paginate results
 
         var pagedQuery = from emp in employees
                          join review in performanceReviews on emp.EmployeeId equals review.EmployeeId

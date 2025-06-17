@@ -1,4 +1,7 @@
-﻿using static System.Console;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.Intrinsics.X86;
+using static System.Console;
 namespace LINQ_Challeges;
 
 public class Challenge_16
@@ -28,11 +31,10 @@ public class Challenge_16
             (209, 9, 105, 8, DateTime.Now.AddDays(-18)), // Ivy bought 8 Keyboards
             (210, 10, 102, 2, DateTime.Now.AddDays(-22)) // Jack bought 2 Phones
         };
-
-
     public Challenge_16()
     {
-        HighestSpenders_T1();
+        //HighestSpenders_T1();
+        HighestSpendersAbove5000_T2();
     }
 
     // 🚀 Task 1: Total Sales Per Customer
@@ -61,6 +63,8 @@ public class Challenge_16
         }
         WriteLine();
 
+
+        // below version is better, because it avoid unnecessary lookups on Products data set
         highestSpenders = from cust in customers
                           join sale in sales on cust.CustomerId equals sale.CustomerId
                           join product in products on sale.ProductId equals product.ProductId
@@ -86,5 +90,33 @@ public class Challenge_16
     //✅ Modify Task 1
     //✅ Apply where to filter customers whose total spent exceeds $5,000
     //✅ Sort results in descending order
+    public void HighestSpendersAbove5000_T2()
+    {
+        var highestAbove5000 = from cust in customers
+                               join sale in sales on cust.CustomerId equals sale.CustomerId
+                               join prod in products on sale.ProductId equals prod.ProductId
+                               group new { sale, prod } by cust into custGroup
+
+                               let totalSpent = custGroup.Sum(x => x.sale.Quantity * x.prod.Price)
+
+                               orderby totalSpent descending
+                               where totalSpent >= 3000
+                               select new
+                               {
+                                   Customer = custGroup.Key.Name,
+                                   TotalSpent = totalSpent
+                               };
+        foreach (var item in highestAbove5000)
+        {
+            WriteLine($"{item.Customer}\t${item.TotalSpent}");
+        }
+        WriteLine();
+    }
+
+
+    //🚀 Task 3: Find Highest Single Purchase Per Customer
+    //✅ Use a subquery to find the highest single purchase per customer
+    //✅ Only include purchases worth more than $2,000
+    //✅ Sort by purchase amount descending
 
 }

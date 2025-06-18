@@ -1,10 +1,4 @@
-﻿using Azure;
-using LINQ_Challeges;
-using LINQ_Challeges.Models;
-using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.Intrinsics.X86;
-using System.Text.RegularExpressions;
+﻿using LINQ_Challeges;
 using static System.Console;
 
 public class Program

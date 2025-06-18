@@ -44,7 +44,7 @@ public class Challenge_17
     public Challenge_17()
     {
         //TopCourseCompleters_T1();
-        //sMostActiveEnrollers_T2();
+        //MostActiveEnrollers_T2();
         ConsistantHighRatings_T3();
     }
 

@@ -1,5 +1,4 @@
-﻿using Azure;
-using static System.Console;
+﻿using static System.Console;
 namespace LINQ_Challeges;
 
 public class Challenge_16

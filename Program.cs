@@ -27,7 +27,8 @@ public class Program
         //Challenge_15();                   // pagination
 
         //new Challenge_16();
-        new Challenge_17();
+        //new Challenge_17();
+        new Challenge_18();
     }
 
     private static void Challenge_15()

@@ -1,4 +1,6 @@
-﻿using static System.Console;
+﻿using LINQ_Challeges.Models;
+using System.Text.RegularExpressions;
+using static System.Console;
 
 namespace LINQ_Challeges
 {
@@ -50,6 +52,7 @@ namespace LINQ_Challeges
         public Challenge_18()
         {
             TopContributors_T1();
+            TopQualityProject_T2();
         }
 
 
@@ -100,6 +103,39 @@ namespace LINQ_Challeges
             }
         }
 
+
+
+        // Task 2: Project Quality Rankings
+        //- JOIN developers → reviews → projects
+        //- GROUP BY project
+        //- CALCULATE:
+        //- Average review score
+        //- Total reviewers
+        //- FILTER: only projects with at least 3 reviews
+        //- ORDER BY average score DESCENDING
+        public void TopQualityProject_T2()
+        {
+            var topQualityProjects = from project in projects
+                                     join review in reviews on project.ProjectId equals review.ProjectId
+                                     group review by project into projectGroup
+
+                                     let avg = Math.Round(projectGroup.Average(x => x.Score), 1)
+                                     let count = projectGroup.Count()
+
+                                     where count >= 3
+                                     orderby avg descending
+                                     select new
+                                     {
+                                         Project = projectGroup.Key.Title,
+                                         AvgScore = avg,
+                                         ReviewCount = count
+                                     };
+
+            foreach (var item in topQualityProjects)
+            {
+                WriteLine($"{item.Project}\t\tAvg: {item.AvgScore}\t\tCount: {item.ReviewCount}");
+            }
+        }
 
     }
 }

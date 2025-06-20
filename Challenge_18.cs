@@ -1,4 +1,5 @@
 ﻿using LINQ_Challeges.Models;
+using System.Runtime.ConstrainedExecution;
 using System.Text.RegularExpressions;
 using static System.Console;
 
@@ -51,12 +52,43 @@ namespace LINQ_Challeges
 
         public Challenge_18()
         {
-            TopContributors_T1();
-            TopQualityProject_T2();
+            //TopContributors_T1();
+            //TopQualityProject_T2();
+            TopReviewdDevs_T3();
         }
 
 
+        // 🔸 Task 3: Developer Efficiency
+        //- Combine assignments and reviews per dev-project pair
+        //- Calculate hours per review point
+        //- SORT lowest-to-highest for most efficient contributors
+        //- PAGINATE top 5 efficiency score
+        private void TopReviewdDevs_T3()
+        {
+            var topReviewedDevs = (from dev in developers
+                                   join task in assignments on dev.DevId equals task.DevId
+                                   join review in reviews on new { dev.DevId, task.ProjectId } equals new { review.DevId, review.ProjectId }
+                                   group new { review, task } by dev into devGroup
 
+                                   let totalHours = devGroup.Sum(x => x.task.HoursPerWeek)
+                                   let totalScore = devGroup.Sum(x => x.review.Score)
+                                   let efficiency = Math.Round((float)totalHours / totalScore, 2)
+
+                                   orderby efficiency ascending
+
+                                   select new
+                                   {
+                                       Dev = devGroup.Key.Name,
+                                       TotalHours = totalHours,
+                                       TotalScore = totalScore,
+                                       Efficiency = efficiency
+                                   }).Take(5);
+
+            foreach (var item in topReviewedDevs)
+            {
+                WriteLine($"{item.Dev}\t\tHours:{item.TotalHours}\t\tScore:{item.TotalScore}\t\tEfficiecy:{item.Efficiency}");
+            }
+        }
 
         // 🚀 Challenge Set
         //🔸 Task 1: Top Contributors by Hours

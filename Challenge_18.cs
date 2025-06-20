@@ -1,7 +1,4 @@
-﻿using LINQ_Challeges.Models;
-using System.Runtime.ConstrainedExecution;
-using System.Text.RegularExpressions;
-using static System.Console;
+﻿using static System.Console;
 
 namespace LINQ_Challeges
 {

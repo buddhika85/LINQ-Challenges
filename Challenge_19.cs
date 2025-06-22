@@ -1,7 +1,4 @@
 ﻿namespace LINQ_Challeges;
-
-using LINQ_Challeges.Models;
-using System.Text.RegularExpressions;
 using static System.Console;
 public class Challenge_19
 {
@@ -41,9 +38,9 @@ public class Challenge_19
 
     public Challenge_19()
     {
-        TopScoringEmployees_t1();
+        //TopScoringEmployees_t1();
+        TrainingPopularity_t2();
     }
-
 
     //✅ Task 2: Training Popularity
     //- JOIN trainings → enrollments
@@ -51,8 +48,28 @@ public class Challenge_19
     //- COUNT enrolled employees
     //- ORDER by count DESC
     //- INCLUDE program duration in result
+    private void TrainingPopularity_t2()
+    {
+        var trainingPopularity = from training in trainings
+                                 join enrollment in enrollments on training.TrainingId equals enrollment.TrainingId
+                                 group enrollment by training into trainingGroup
 
+                                 let count = trainingGroup.Count()
 
+                                 orderby count descending
+
+                                 select new
+                                 {
+                                     Training = trainingGroup.Key.Title,
+                                     Enrollments = count,
+                                     Duration = trainingGroup.Key.DurationDays
+                                 };
+
+        foreach (var item in trainingPopularity)
+        {
+            WriteLine($"{item.Training}\t{item.Enrollments} count\t\t{item.Duration} days");
+        }
+    }
 
     //✅ Task 1: Top Scoring Employees
     //- JOIN employees → evaluations
@@ -98,8 +115,4 @@ public class Challenge_19
             }
         }
     }
-
-
-
-
 }

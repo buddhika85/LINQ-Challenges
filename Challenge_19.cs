@@ -1,5 +1,10 @@
 ﻿namespace LINQ_Challeges;
+using LINQ_Challeges.Models;
+using System;
+using System.Runtime.Intrinsics.X86;
 using static System.Console;
+using static System.Formats.Asn1.AsnWriter;
+
 public class Challenge_19
 {
     private List<(int EmpId, string Name)> employees = new()
@@ -39,8 +44,48 @@ public class Challenge_19
     public Challenge_19()
     {
         //TopScoringEmployees_t1();
-        TrainingPopularity_t2();
+        //TrainingPopularity_t2();
+        HighImpactTraining_t3();
     }
+
+
+
+
+    // ✅ Task 3: High-Impact Training
+    //- JOIN trainings → evaluations
+    //- CALCULATE:
+    //- Average evaluation score per training
+    //- Total participants
+    //- FILTER: programs with avg score ≥ 80 & at least 3 evaluations
+    //- ORDER BY score descending
+    private void HighImpactTraining_t3()
+    {
+        var highImpactTrainings = from training in trainings
+                                  join eval in evaluations on training.TrainingId equals eval.TrainingId
+                                  join enrol in enrollments on new { eval.EmpId, eval.TrainingId } equals new { enrol.EmpId, enrol.TrainingId }
+                                  group new { eval, enrol } by training into traniningGroup
+
+                                  let avgScore = Math.Round(traniningGroup.Average(x => x.eval.Score), 1)
+                                  let evalCount = traniningGroup.Select(x => x.eval).Count()
+                                  let totalParticipants = traniningGroup.Select(x => x.enrol).Count()
+
+                                  where avgScore >= 80 && evalCount >= 3
+                                  orderby avgScore descending
+
+                                  select new
+                                  {
+                                      Training = traniningGroup.Key.Title,
+                                      AvgScore = avgScore,
+                                      EvalCount = evalCount,
+                                      TotalParticipants = totalParticipants
+                                  };
+
+        foreach (var item in highImpactTrainings)
+        {
+            WriteLine($"{item.Training}\t\tStuds: {item.TotalParticipants}\t\tEvals: {item.EvalCount}\t\tAvg: {item.AvgScore}");
+        }
+    }
+
 
     //✅ Task 2: Training Popularity
     //- JOIN trainings → enrollments

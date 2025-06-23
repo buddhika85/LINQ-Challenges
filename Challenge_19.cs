@@ -1,7 +1,11 @@
 ﻿namespace LINQ_Challeges;
 
 using System;
+using System.Collections.Generic;
+using System.Security.AccessControl;
+using System.Text.RegularExpressions;
 using static System.Console;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 public class Challenge_19
 {
@@ -47,6 +51,25 @@ public class Challenge_19
         ScoreBandsByTraining_t4();
     }
 
+    // Score Bands by Training Program
+    //We’ll categorize the average evaluation scores into performance bands and summarize how many employees fall into each—ideal for identifying strengths and red flags.
+    //📌 Objective
+    //For each training:
+    //- Join evaluations → trainings
+    //- Group by training title
+    //- Calculate:
+    //- Average score
+    //- Band:
+    //- "Outstanding" → 90+
+    //- "Strong" → 80–89
+    //- "Developing" → 70–79
+    //- "Needs Improvement" → below 70
+    //- Count how many trainings fall in each band
+    //📊 Expected Output
+    //Outstanding:           2 trainings
+    //Strong:                1 training
+    //Developing:            2 trainings
+    //Needs Improvement:     0 trainings
     private void ScoreBandsByTraining_t4()
     {
         var scoreBandsByTraning = from training in trainings

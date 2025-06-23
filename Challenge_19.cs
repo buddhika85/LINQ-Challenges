@@ -1,9 +1,7 @@
 ﻿namespace LINQ_Challeges;
-using LINQ_Challeges.Models;
+
 using System;
-using System.Runtime.Intrinsics.X86;
 using static System.Console;
-using static System.Formats.Asn1.AsnWriter;
 
 public class Challenge_19
 {
@@ -45,7 +43,42 @@ public class Challenge_19
     {
         //TopScoringEmployees_t1();
         //TrainingPopularity_t2();
-        HighImpactTraining_t3();
+        //HighImpactTraining_t3();
+        ScoreBandsByTraining_t4();
+    }
+
+    private void ScoreBandsByTraining_t4()
+    {
+        var scoreBandsByTraning = from training in trainings
+                                  join eval in evaluations on training.TrainingId equals eval.TrainingId
+                                  group eval by training.TrainingId into trainingGroup
+
+                                  let avg = Math.Round(trainingGroup.Average(x => x.Score), 2)
+                                  select new
+                                  {
+                                      TrainingId = trainingGroup.Key,
+                                      Avg = avg,
+                                      Band = avg >= 90 ? "Outstanding" : avg >= 80 ? "Strong" : avg >= 70 ? "Development" : "Needs Improvment"
+                                  };
+
+        foreach (var item in scoreBandsByTraning)
+        {
+            WriteLine($"Training {item.TrainingId}\tavg:{item.Avg}\tBand:{item.Band}");
+        }
+        WriteLine();
+
+        var scoreBandCounts = from item in scoreBandsByTraning
+                              group item by item.Band into bandGroup
+                              let count = bandGroup.Count()
+                              select new
+                              {
+                                  Band = bandGroup.Key,
+                                  Count = count
+                              };
+        foreach (var item in scoreBandCounts)
+        {
+            WriteLine($"{item.Band} = {item.Count}");
+        }
     }
 
 

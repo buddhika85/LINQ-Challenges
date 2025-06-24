@@ -48,8 +48,55 @@ public class Challenge_19
         //TopScoringEmployees_t1();
         //TrainingPopularity_t2();
         //HighImpactTraining_t3();
-        ScoreBandsByTraining_t4();
+        //ScoreBandsByTraining_t4();
+        ScoreBandsByEmployee_t5();
     }
+
+    // Learner Score Profiles by Band
+    //- Join employees → evaluations
+    //- Group by employee
+    //- Calculate:
+    //- Average score
+    //- Assign a performance band:
+    //- "Outstanding" → 90+
+    //- "Strong" → 80–89
+    //- "Developing" → 70–79
+    //- "Needs Improvement" → below 70
+    //- Produce a report of employees in each band, optionally paginated
+
+    private void ScoreBandsByEmployee_t5()
+    {
+        var empsByBands = from emp in employees
+                          join eval in evaluations on emp.EmpId equals eval.EmpId
+                          group eval by emp.EmpId into empGroup
+                          let avgScore = empGroup.Average(x => x.Score)
+                          orderby avgScore descending
+                          select new
+                          {
+                              EmpId = empGroup.Key,
+                              Average = Math.Round(avgScore, 2),
+                              Band = avgScore >= 90 ? "Outstanding" : avgScore >= 80 ? "Strong" : avgScore >= 70 ? "Developing" : "Needs Improvement"
+                          };
+        foreach (var item in empsByBands)
+        {
+            WriteLine($"{item.EmpId}\t{item.Average}%\t{item.Band}");
+        }
+        WriteLine();
+        var bandCounts = from emp in empsByBands
+                         group emp.EmpId by emp.Band into bandGroup
+                         let count = bandGroup.Count()
+                         select new
+                         {
+                             Band = bandGroup.Key,
+                             Count = count
+                         };
+        foreach (var item in bandCounts)
+        {
+            WriteLine($"{item.Band}\t{item.Count}");
+        }
+    }
+
+
 
     // Score Bands by Training Program
     //We’ll categorize the average evaluation scores into performance bands and summarize how many employees fall into each—ideal for identifying strengths and red flags.

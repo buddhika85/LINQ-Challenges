@@ -1,10 +1,4 @@
-﻿
-using System.Collections.Generic;
-using System.Reflection.Metadata;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Principal;
-using static System.Console;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using static System.Console;
 
 namespace LINQ_Challeges
 {
@@ -51,7 +45,9 @@ namespace LINQ_Challeges
 
         public Challenge_20()
         {
-            TopPerformingAgents_t1();
+            //TopPerformingAgents_t1();
+            //MostActiveTicketCategories_t2();
+            EfficiencyByCategory_t3();
         }
 
         // 🔹 Task 1: Top-Performing Support Agent
@@ -103,8 +99,71 @@ namespace LINQ_Challeges
             }
         }
 
+        // Task 2: Most Active Ticket Categories
+        //You want to understand which types of issues are most frequently reported.Using the ticket history:
+        //- Determine how many tickets fall under each category.
+        //- Rank the categories from most to least active.
+        //🔍 Expected Insight: A list showing which issue categories (e.g., Networking, Software, Hardware) generate the most support activity.
+        private void MostActiveTicketCategories_t2()
+        {
+            var topCategories = from categ in categories
+                                join ticket in tickets on categ.CategoryId equals ticket.CategoryId
+                                group ticket by categ into categGroup
+                                let ticketCount = categGroup.Count()
+                                orderby ticketCount descending
+                                select new
+                                {
+                                    Category = categGroup.Key,
+                                    TicketCount = ticketCount
+                                };
 
+            foreach (var categ in topCategories)
+            {
+                WriteLine($"{categ.Category.Title}\t\t{categ.TicketCount}");
+            }
+        }
 
+        // 🔹 Task 3: Efficiency of Ticket Resolutions by Category
+        //You’d like to assess how efficiently issues are being resolved, depending on their category:
+        //- For each category, calculate the average time spent resolving tickets and the average feedback score.
+        //- Only include categories that have at least three resolved tickets.
+        //🔍 Expected Insight: A summary comparing resolution speed and quality across categories, helping pinpoint which areas are performing well or may need improvement.
+        private void EfficiencyByCategory_t3()
+        {
+            var effiByCategory = (from categ in categories
+                                  join ticket in tickets on categ.CategoryId equals ticket.CategoryId
+                                  join resolv in resolutions on ticket.TicketId equals resolv.TicketId
+                                  group new { ticket, resolv } by categ into cateGroup
 
+                                  let ticketCount = cateGroup.Count()
+
+                                  where ticketCount >= 3
+
+                                  let avgTime = cateGroup.Average(x => x.resolv.HoursSpent)
+                                  let avgScore = cateGroup.Average(x => x.resolv.Score)
+
+                                  orderby avgScore descending
+
+                                  select new
+                                  {
+                                      Category = cateGroup.Key.Title,
+                                      TicketCount = ticketCount,
+                                      AvgTime = Math.Round(avgTime, 2),
+                                      AvgScore = Math.Round(avgScore, 2)
+                                  }).ToList();
+
+            var timeAvg = Math.Round(effiByCategory.Average(x => x.AvgTime), 2);
+            var scoreAvg = Math.Round(effiByCategory.Average(x => x.AvgScore), 2);
+
+            WriteLine($"Global Avg Time: {timeAvg}");
+            WriteLine($"Global Avg Score: {scoreAvg}\n");
+
+            foreach (var item in effiByCategory)
+            {
+                WriteLine($"{item.Category}\t\t{item.TicketCount} tickets \t\t{item.AvgTime} AvgTime\t\t{item.AvgScore} AvgScore\t\t" +
+                    $"{(item.AvgScore >= scoreAvg ? "Above Score" : "Below Score")}\t\t" +
+                    $"{(item.AvgTime > timeAvg ? "More than Avg Time" : "Less than Avg time")}");
+            }
+        }
     }
 }

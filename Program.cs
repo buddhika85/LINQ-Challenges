@@ -32,7 +32,9 @@ public class Program
         //new Challenge_19();
 
         //new Challenge_20();
-        new Challenge_21();
+        //new Challenge_21();
+
+        new LinqChallenge_22();
     }
 
     private static void Challenge_15()

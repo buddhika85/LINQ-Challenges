@@ -31,7 +31,8 @@ public class Program
         //new Challenge_18();
         //new Challenge_19();
 
-        new Challenge_20();
+        //new Challenge_20();
+        new Challenge_21();
     }
 
     private static void Challenge_15()

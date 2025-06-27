@@ -1,8 +1,5 @@
 ﻿
-using LINQ_Challeges.Models;
 using static System.Console;
-using static System.Formats.Asn1.AsnWriter;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LINQ_Challeges;
 
@@ -44,7 +41,9 @@ public class Challenge_21
 
     public Challenge_21()
     {
-        EmployeeContributionReport();
+        //EmployeeContributionReport();
+        ProjectTechImpactAnalysis();
+        //ProjectLeaderboardEfficiency();
     }
 
     //For each employee, calculate total hours contributed across all projects.
@@ -87,27 +86,55 @@ public class Challenge_21
 
     //    Task 2: Project Tech Impact Analysis
     //For each tech stack, compute:
-
     //- Number of distinct employees working on it
     //- Average review score across all its projects
     //Only include stacks with at least 2 projects and 3 reviews total
     //Order by average score descending
+    private void ProjectTechImpactAnalysis()
+    {
+        var projectTechAnalysis = from proj in projects
+                                  join assignment in assignments on proj.ProjId equals assignment.ProjId
+                                  join review in reviews on proj.ProjId equals review.ProjId
 
+                                  group new { assignment, review } by proj.TechStack into projGroup
+
+
+                                  let projectReviews = projGroup.Select(x => x.review).Distinct()
+
+                                  let reviewCount = projectReviews.Count()
+                                  let projectCount = projectReviews.Select(x => x.ProjId).Distinct().Count()
+
+                                  where projectCount >= 2 && reviewCount >= 3
+                                  let empCount = projGroup.Select(x => x.assignment.EmpId).Distinct().Count()
+                                  let reviewScoreAvg = projectReviews.Average(x => x.Score)
+
+                                  orderby reviewScoreAvg descending
+
+                                  select new
+                                  {
+                                      TackStack = projGroup.Key,
+                                      EmpCount = empCount,
+                                      ReviewScoreAvg = Math.Round(reviewScoreAvg, 2),
+                                      ProjectCount = projectCount,
+                                      ReviewCount = reviewCount
+                                  };
+
+        foreach (var item in projectTechAnalysis)
+        {
+            WriteLine($"{item.TackStack}\t\t{item.ProjectCount} projects\t\t{item.EmpCount} Employees\t\t{item.ReviewCount} reviews\t\t{item.ReviewScoreAvg} Avg Score");
+        }
+    }
 
     //    Task 3: Project Leaderboard by Efficiency
     //For each project:
-
     //- Compute total hours logged and average review score
     //- Define “efficiency” as average score ÷ hours
     //Only include projects with at least 2 participants
     //Show top 5 by efficiency
+    private void ProjectLeaderboardEfficiency()
+    {
 
-
-
-
-
-
-
+    }
 }
 
 

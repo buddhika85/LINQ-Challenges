@@ -25,8 +25,8 @@ public class LinqChallenge_22
 
     public LinqChallenge_22()
     {
-        HighestSpenders_T1();
-        //HighestSpendersAbove5000_T2();
+        //HighestSpenders_T1();
+        HighestSpendersAbove5000_T2();
         //RegionalSpenderStats_T3();
     }
 
@@ -66,9 +66,27 @@ public class LinqChallenge_22
 
     // 🔹 Task 2: Show only customers whose total spend is above $5000
     // ⏱️ Expected Time: 8–10 minutes
+    // 9:49 -
     private void HighestSpendersAbove5000_T2()
     {
-        // implement LINQ query here...
+        var highSpenders = (from cust in customers
+                            join order in orders on cust.CustomerId equals order.CustomerId
+                            group order by cust into custGroup
+
+                            let totalSpend = custGroup.Sum(x => x.Amount)
+
+                            where totalSpend > 5000
+                            orderby totalSpend descending
+
+                            select new
+                            {
+                                Customer = custGroup.Key.Name,
+                                TotalSpend = totalSpend
+                            }).ToList();
+        foreach (var item in highSpenders)
+        {
+            WriteLine($"{item.Customer}\t\t Spent ${item.TotalSpend}");
+        }
     }
 
     // 🔹 Task 3: Group by region and compute:

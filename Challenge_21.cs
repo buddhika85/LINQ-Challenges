@@ -42,8 +42,8 @@ public class Challenge_21
     public Challenge_21()
     {
         //EmployeeContributionReport();
-        ProjectTechImpactAnalysis();
-        //ProjectLeaderboardEfficiency();
+        //ProjectTechImpactAnalysis();
+        ProjectLeaderboardEfficiency();
     }
 
     //For each employee, calculate total hours contributed across all projects.
@@ -125,6 +125,7 @@ public class Challenge_21
         }
     }
 
+    // 11:40 AM - 11:55 AM
     //    Task 3: Project Leaderboard by Efficiency
     //For each project:
     //- Compute total hours logged and average review score
@@ -133,7 +134,37 @@ public class Challenge_21
     //Show top 5 by efficiency
     private void ProjectLeaderboardEfficiency()
     {
+        var LeaderboardByEfficiency = (from proj in projects
+                                       join time in timeLogs on proj.ProjId equals time.ProjId
+                                       join review in reviews on new { time.ProjId, time.EmpId } equals new { review.ProjId, review.EmpId }
 
+                                       group new { time, review } by proj into projGroup
+
+                                       let particpantsCount = projGroup.Select(x => x.time.EmpId).Distinct().Count()
+
+                                       where particpantsCount >= 2
+
+                                       let totalHoursForProject = projGroup.Sum(x => x.time.Hours)
+                                       let avgScoreForProject = projGroup.Average(x => x.review.Score)
+                                       let efficiency = avgScoreForProject / totalHoursForProject
+
+
+
+                                       orderby efficiency descending
+
+                                       select new
+                                       {
+                                           Project = projGroup.Key.Name,
+                                           TotalHoursForProject = totalHoursForProject,
+                                           AvgScoreForProject = Math.Round(avgScoreForProject, 2),
+                                           Efficiency = Math.Round(efficiency, 2),
+                                           ParticpantsCount = particpantsCount
+                                       }).Take(5);
+
+        foreach (var item in LeaderboardByEfficiency)
+        {
+            WriteLine($"{item.Project}\t\t{item.ParticpantsCount} Particpants\t\t{item.TotalHoursForProject} Hours\t\t{item.AvgScoreForProject} Avg Score\t\t{item.Efficiency} Efficiency\t\t");
+        }
     }
 }
 

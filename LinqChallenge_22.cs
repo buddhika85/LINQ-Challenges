@@ -26,8 +26,8 @@ public class LinqChallenge_22
     public LinqChallenge_22()
     {
         //HighestSpenders_T1();
-        HighestSpendersAbove5000_T2();
-        //RegionalSpenderStats_T3();
+        //HighestSpendersAbove5000_T2();
+        RegionalSpenderStats_T3();
     }
 
     // 🔹 Task 1: List customers sorted by total spend (high to low)
@@ -66,7 +66,7 @@ public class LinqChallenge_22
 
     // 🔹 Task 2: Show only customers whose total spend is above $5000
     // ⏱️ Expected Time: 8–10 minutes
-    // 9:49 -
+    // 9:49 - 9:55
     private void HighestSpendersAbove5000_T2()
     {
         var highSpenders = (from cust in customers
@@ -94,8 +94,34 @@ public class LinqChallenge_22
     //   - Total number of customers in each region
     //   - Only include regions with 2+ customers
     // ⏱️ Expected Time: 12–15 minutes
+    // 9:57 - 10:10
     private void RegionalSpenderStats_T3()
     {
-        // implement LINQ query here...
+        var regionalSpenderStats = from cust in customers
+                                   join order in orders on cust.CustomerId equals order.CustomerId
+
+                                   group order by cust.Region into regionGroup
+
+                                   let custCount = regionGroup.Select(x => x.CustomerId).Distinct().Count()
+
+                                   where custCount >= 2
+
+                                   let avgSpent = (from item in regionGroup
+                                                   group item by item.CustomerId into custGroup
+                                                   select custGroup.Sum(x => x.Amount)).Average()
+
+                                   orderby custCount descending
+
+                                   select new
+                                   {
+                                       Region = regionGroup.Key,
+                                       CustomerCount = custCount,
+                                       AvgSpent = Math.Round(avgSpent, 2)
+                                   };
+
+        foreach (var item in regionalSpenderStats)
+        {
+            WriteLine($"{item.Region}\t\t{item.CustomerCount} customers\t\t$ {item.AvgSpent} Avg");
+        }
     }
 }

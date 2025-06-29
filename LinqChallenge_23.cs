@@ -50,8 +50,8 @@ public class LinqChallenge_23
     public LinqChallenge_23()
     {
         //TierLeaderboard_T1();
-        TopExporters_T2();
-        //AvgScorePerTier_T3();
+        //TopExporters_T2();
+        AvgScorePerTier_T3();
         //ActiveUserRevenueReport_T4();
     }
 
@@ -118,11 +118,34 @@ public class LinqChallenge_23
     // 🔹 Task 3: Feedback Quality by Tier
     // Calculate average feedback score per plan Tier. Only include tiers with 2+ reviews.
     // ⏱️ Expected time: 12–15 minutes
-    private void AvgScorePerTier_T3() { }
+    // 10:36 - 10:41
+    private void AvgScorePerTier_T3()
+    {
+        var qualityByTier = from plan in plans
+                            join feedback in feedbacks on plan.PlanId equals feedback.PlanId
+                            group feedback by plan into planGroup
+
+                            where planGroup.Count() >= 2
+                            let avgScore = planGroup.Average(x => x.Score)
+
+                            orderby avgScore descending
+                            select new
+                            {
+                                Tier = planGroup.Key.Tier,
+                                AvgScore = Math.Round(avgScore, 2)
+                            };
+
+        foreach (var item in qualityByTier)
+        {
+            WriteLine($"{item.Tier}\t\t{item.AvgScore} Avg Score");
+        }
+    }
 
     // 🔹 Task 4: Active User Revenue Report
     // For active (non-ended) subscriptions: compute revenue per user and total per country.
     // Return top 3 countries by total revenue.
     // ⏱️ Expected time: 15–18 minutes
-    private void ActiveUserRevenueReport_T4() { }
+    private void ActiveUserRevenueReport_T4()
+    {
+    }
 }

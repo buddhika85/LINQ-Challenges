@@ -34,7 +34,8 @@ public class Program
         //new Challenge_20();
         //new Challenge_21();
 
-        new LinqChallenge_22();
+        //new LinqChallenge_22();
+        new LinqChallenge_23();
     }
 
     private static void Challenge_15()

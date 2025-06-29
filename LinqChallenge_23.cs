@@ -51,8 +51,8 @@ public class LinqChallenge_23
     {
         //TierLeaderboard_T1();
         //TopExporters_T2();
-        AvgScorePerTier_T3();
-        //ActiveUserRevenueReport_T4();
+        //AvgScorePerTier_T3();
+        ActiveUserRevenueReport_T4();
     }
 
     // 🔹 Task 1: Tier Leaderboard
@@ -145,7 +145,33 @@ public class LinqChallenge_23
     // For active (non-ended) subscriptions: compute revenue per user and total per country.
     // Return top 3 countries by total revenue.
     // ⏱️ Expected time: 15–18 minutes
+    // 10:45
     private void ActiveUserRevenueReport_T4()
     {
+        var activeUserRevenueReport = from user in users
+                                      join sub in subscriptions on user.UserId equals sub.UserId
+                                      join plan in plans on sub.PlanId equals plan.PlanId
+
+                                      where sub.End == null
+
+                                      group new { sub, plan } by user.Country into countryGroup
+
+                                      let today = DateTime.Today
+
+                                      let months = countryGroup.Select(x => ((today.Year - x.sub.Start.Year) * 12) + (today.Month - x.sub.Start.Month)).First()
+                                      let total = countryGroup.Select(x => x.plan.MonthlyPrice * months)
+
+                                      orderby total descending
+
+                                      select new
+                                      {
+                                          Country = countryGroup.Key,
+                                          Total = total
+                                      };
+
+        foreach (var item in activeUserRevenueReport)
+        {
+            WriteLine($"{item.Country}\t\t${item.Total}");
+        }
     }
 }

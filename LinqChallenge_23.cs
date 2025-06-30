@@ -156,10 +156,13 @@ public class LinqChallenge_23
 
                                       group new { sub, plan } by user.Country into countryGroup
 
-                                      let today = DateTime.Today
 
-                                      let months = countryGroup.Select(x => ((today.Year - x.sub.Start.Year) * 12) + (today.Month - x.sub.Start.Month)).First()
-                                      let total = countryGroup.Select(x => x.plan.MonthlyPrice * months)
+
+                                      let today = DateTime.Today
+                                      let total = countryGroup.Sum(x =>
+                                          ((today.Year - x.sub.Start.Year) * 12 + today.Month - x.sub.Start.Month -
+                                          (today.Day < x.sub.Start.Day ? 1 : 0)) * x.plan.MonthlyPrice)
+
 
                                       orderby total descending
 

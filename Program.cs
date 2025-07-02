@@ -1,4 +1,5 @@
 ﻿using LINQ_Challeges;
+using System.Linq;
 using static System.Console;
 
 public class Program
@@ -38,6 +39,24 @@ public class Program
         //new LinqChallenge_23();
         //new LinqChallenge_24();
         //new LinqChallenge_25();
+
+        WriteLine(GetSumOfEvenNums(new List<int> { 2, 3, 4, 5 }));    // 6
+
+        WriteLine(ReturnCsString(new List<string> { "cat", "dog", "cow" }));    // 6
+
+    }
+
+
+    public static int GetSumOfEvenNums(IEnumerable<int> nums)
+    {
+        return nums.Where(x => x % 2 == 0).Sum();
+    }
+
+    public static string ReturnCsString(IEnumerable<string> words)
+    {
+        //return string.Join(',', words);
+
+        return words.Aggregate((aggre, word) => $"{aggre}, {word}");
     }
 
     private static void Challenge_15()

@@ -64,7 +64,7 @@ public class LinqChallenge_25
 
                                    let enrolmentsCount = levelGroup.Count()
                                    let completionCount = levelGroup.Where(x => x.Completed).Count()
-                                   let completionRate = Math.Round((float)completionCount / enrolmentsCount, 2) * 100
+                                   let completionRate = Math.Round((decimal)completionCount / enrolmentsCount, 2) * 100
 
                                    orderby completionRate descending
 

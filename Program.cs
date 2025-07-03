@@ -1,6 +1,4 @@
-﻿using LINQ_Challeges;
-using System.Linq;
-using static System.Console;
+﻿using static System.Console;
 
 public class Program
 {
@@ -38,11 +36,11 @@ public class Program
         //new LinqChallenge_22();
         //new LinqChallenge_23();
         //new LinqChallenge_24();
-        //new LinqChallenge_25();
+        new LinqChallenge_25();
 
-        WriteLine(GetSumOfEvenNums(new List<int> { 2, 3, 4, 5 }));    // 6
+        //WriteLine(GetSumOfEvenNums(new List<int> { 2, 3, 4, 5 }));    // 6
 
-        WriteLine(ReturnCsString(new List<string> { "cat", "dog", "cow" }));    // 6
+        //WriteLine(ReturnCsString(new List<string> { "cat", "dog", "cow" }));    // 6
 
     }
 

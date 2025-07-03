@@ -1,4 +1,5 @@
-﻿using static System.Console;
+﻿using LINQ_Challeges;
+using static System.Console;
 
 public class Program
 {

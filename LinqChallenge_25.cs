@@ -48,8 +48,8 @@ public class LinqChallenge_25
     {
         //LevelCompletionRates_T1();
         //TopRatedAdvancedCourses_T2();
-        //CountryWiseAvgStudyTime_T3();
-        InconsistentStudents_T4();
+        CountryWiseAvgStudyTime_T3();
+        //InconsistentStudents_T4();
     }
 
     // 🔹 Task 1: Completion Rates by Course Level
@@ -112,37 +112,34 @@ public class LinqChallenge_25
         }
     }
 
+
+
     // 🔹 Task 3: Country-wise Average Daily Study Time
-    // For each country, average total minutes logged per student.
+    // Country, StudentCount, Total time, Avg time per student
     // Include only countries with 2+ students and 100+ total minutes.
     // ⏱️ Expected time: 14–17 minutes
-    // 10:48 - 10:55
+    // 10:45 - 11:02
     private void CountryWiseAvgStudyTime_T3()
     {
         var countryAvgStudyTime = from stud in students
                                   join log in studyLogs on stud.StudentId equals log.StudentId
+                                  group new { stud, log } by stud.Country into countryGroup
 
-                                  group log by stud.Country into countryGroup
+                                  let total = countryGroup.Select(x => x.log).Sum(x => x.Minutes)
+                                  let studCount = countryGroup.Select(x => x.stud.StudentId).Distinct().Count()
+                                  let avgTimePerStud = Math.Round((decimal)total / studCount, 2)
 
-                                  let totalStudyTime = countryGroup.Sum(x => x.Minutes)
-                                  let minStudyTime = countryGroup.Min(x => x.Minutes)
-                                  let maxStudyTime = countryGroup.Max(x => x.Minutes)
-                                  let avgStudyTime = countryGroup.Average(x => x.Minutes)
-
-                                  orderby avgStudyTime descending
-
+                                  where studCount >= 2 && total >= 100
                                   select new
                                   {
                                       Country = countryGroup.Key,
-                                      TotalStudyTime = totalStudyTime,
-                                      MinStudyTime = minStudyTime,
-                                      MaxStudyTime = maxStudyTime,
-                                      AvgStudyTime = Math.Round(avgStudyTime, 2)
+                                      StudentCount = studCount,
+                                      Total = total,
+                                      AvgTimePerStudent = avgTimePerStud
                                   };
-
         foreach (var item in countryAvgStudyTime)
         {
-            WriteLine($"{item.Country}\t\t{item.AvgStudyTime} Avg\t\t{item.TotalStudyTime} Tot\t\t{item.MaxStudyTime} Max\t\t{item.MinStudyTime} min");
+            WriteLine($"{item.Country}\t\tStudents:{item.StudentCount}\t\tTotal mins: {item.Total}\t\tAvg mins: {item.AvgTimePerStudent}");
         }
     }
 

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using static System.Console;
+﻿using static System.Console;
 
 namespace LINQ_Challeges;
 
@@ -39,10 +37,10 @@ public class LinqChallenge_28
 
     public LinqChallenge_28()
     {
-        MonthlyDepositTrend_T1();
+        //MonthlyDepositTrend_T1();
         //CustomerSpendingStdev_T2();
         //DormantAccounts_T3();
-        //AccountChurnDetection_T4();
+        AccountChurnDetection_T4();
     }
 
     // 🔹 Task 1: Monthly Deposit Trend
@@ -72,19 +70,109 @@ public class LinqChallenge_28
     // 🔹 Task 2: Customer Spending Standard Deviation
     // For each customer, calculate the std deviation of their withdrawal amounts.
     // ⏱️ Expected: 15–18 min
+    // 4:54 - 5:09
     private void CustomerSpendingStdev_T2()
     {
+        var custSpendStdDev = from cust in customers
+                              join acc in accounts on cust.CustomerId equals acc.CustomerId
+                              join trans in transactions on acc.AccountId equals trans.AccountId
+
+                              where trans.Type == "Withdrawal"
+
+                              group trans by cust into custGroup
+
+                              let stdDev = custGroup.Select(x => x.Amount).StandardDeviation()
+
+                              orderby stdDev descending
+                              select new
+                              {
+                                  Customer = custGroup.Key.Name,
+                                  WithdrawalStandardDev = stdDev
+                              };
+        foreach (var item in custSpendStdDev)
+        {
+            WriteLine($"{item.Customer}\t\tWithdraw amounts std dev : ${item.WithdrawalStandardDev}");
+        }
     }
+
 
     // 🔹 Task 3: Dormant Accounts
     // List accounts with no transactions in the past 60 days (relative to latest txn).
     // ⏱️ Expected: 12–15 min
-    private void DormantAccounts_T3() { }
+    // 8:16 - 8:31
+    private void DormantAccounts_T3()
+    {
+        var dormantAccs = from acc in accounts
+                          join trans in transactions on acc.AccountId equals trans.AccountId into transGroup
+                          from trans in transGroup.DefaultIfEmpty()
+                          join cust in customers on acc.CustomerId equals cust.CustomerId
+                          group new { trans, cust } by acc into accGroup
+
+                          let latest = accGroup.Select(x => x.trans).Max(x => x.Date)
+                          let customer = accGroup.Select(x => x.cust).FirstOrDefault()
+
+                          where latest > DateTime.Today.AddDays(-60)
+
+                          orderby latest descending
+                          select new
+                          {
+                              AccountId = accGroup.Key.AccountId,
+                              Customer = customer.Name,
+                              LatestTransDate = latest,
+                          };
+
+        foreach (var item in dormantAccs)
+        {
+            WriteLine($"{item.AccountId}\t\tCustomer:{item.Customer}\t\tlast transaction date: {item.LatestTransDate}");
+        }
+
+    }
 
     // 🔹 Task 4: Account Churn Detection
     // For each customer, show number of accounts closed (simulated via Balance = 0).
     // Include only customers with 2+ accounts and at least 1 closure.
     // ⏱️ Expected: 12–15 min
-    private void AccountChurnDetection_T4() { }
+    // 8:21 - 8:38
+    private void AccountChurnDetection_T4()
+    {
+        var accChurn = from cust in customers
+                       join acc in accounts on cust.CustomerId equals acc.CustomerId
 
+                       group acc by cust into custGroup
+
+                       let accCount = custGroup.Count()
+                       where accCount >= 2
+
+                       let zeroBalanceAccCount = custGroup.Where(x => x.Balance == 0.0m).Count()
+                       where zeroBalanceAccCount >= 1
+
+                       select new
+                       {
+                           Customer = custGroup.Key.Name,
+                           AccountsCount = accCount,
+                           ZeroBalanceAccCount = zeroBalanceAccCount
+                       };
+        foreach (var item in accChurn)
+        {
+            WriteLine($"{item.Customer}\t\t{item.AccountsCount} accounts\t\t{item.ZeroBalanceAccCount} Zero Accounts");
+        }
+    }
+
+}
+
+public static class MathExtensions
+{
+    public static decimal StandardDeviation(this IEnumerable<decimal> values)
+    {
+        if (values == null) throw new ArgumentNullException(nameof(values));
+
+        var valueList = values.ToList();
+        if (valueList.Count == 0) return 0;
+
+        decimal mean = valueList.Average();
+        decimal sumOfSquares = valueList.Sum(v => (v - mean) * (v - mean));
+        decimal variance = sumOfSquares / valueList.Count;
+
+        return (decimal)Math.Sqrt((double)variance);
+    }
 }

@@ -44,7 +44,8 @@ public class Program
         //WriteLine(ReturnCsString(new List<string> { "cat", "dog", "cow" }));    // 6
 
         //new LinqChallenge_26();
-        new LinqChallenge_27();
+        //new LinqChallenge_27();
+        new LinqChallenge_28();
     }
 
 

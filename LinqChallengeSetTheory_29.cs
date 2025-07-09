@@ -46,8 +46,9 @@ public class LinqChallengeSetTheory_29
     public LinqChallengeSetTheory_29()
     {
         //CommonProductsBetweenVendors_T1();
-        CommonProductsBetweenVendors_T1_New();
-        //DiscontinuedProcurements_T2();
+        //CommonProductsBetweenVendors_T1_New();
+        DiscontinuedProcurements_T2();
+        DiscontinuedProcurements_T2_New();
         //TopRatedStillAvailableProducts_T3();
         //RegionWiseDistinctCategories_T4();
     }
@@ -98,7 +99,55 @@ public class LinqChallengeSetTheory_29
 
     // 🔹 Task 2: Discontinued Procurements Show all transactions involving discontinued products
     // Use: Subquery / Except / Join ⏱️ Expected: 12–15 min
-    private void DiscontinuedProcurements_T2() { }
+    // 10:18 - 10:30
+    private void DiscontinuedProcurements_T2()
+    {
+        var discontinuedProcurements = from proc in procurements
+                                       join disProd in discontinuedProducts on proc.ProductId equals disProd.ProductId
+                                       join prod in products on disProd.ProductId equals prod.ProductId
+
+                                       where proc.TxnDate >= disProd.DateRemoved
+                                       group new { proc, prod } by disProd into disProdGroup
+                                       select new
+                                       {
+                                           Product = disProdGroup.Select(x => x.prod).First(),
+                                           Transactions = disProdGroup.Select(x => x.proc)
+                                       };
+
+        foreach (var item in discontinuedProcurements)
+        {
+            WriteLine($"{item.Product.Name}");
+            foreach (var trans in item.Transactions)
+            {
+                WriteLine($"Transaction: {trans.TxnId}\t\t on:{trans.TxnDate}\t\t${trans.UnitPrice} Per unit\t\t{trans.Quantity} units");
+            }
+        }
+    }
+
+    // 10:31
+    private void DiscontinuedProcurements_T2_New()
+    {
+        WriteLine();
+        var discontinuedProcurements = from proc in procurements
+                                       join disProd in discontinuedProducts on proc.ProductId equals disProd.ProductId
+
+                                       where proc.TxnDate >= disProd.DateRemoved
+                                       group proc by disProd.ProductId into disProdGroup
+                                       select new
+                                       {
+                                           Product = products.SingleOrDefault(x => x.ProductId == disProdGroup.Key),
+                                           Transactions = disProdGroup
+                                       };
+
+        foreach (var item in discontinuedProcurements)
+        {
+            WriteLine($"{item.Product.Name}");
+            foreach (var trans in item.Transactions)
+            {
+                WriteLine($"Transaction: {trans.TxnId}\t\t on:{trans.TxnDate}\t\t${trans.UnitPrice} Per unit\t\t{trans.Quantity} units");
+            }
+        }
+    }
 
     // 🔹 Task 3: Top Rated Still-Available Products Products with score ≥ 4 and not discontinued
     // Use: Except, GroupBy, Aggregate ⏱️ Expected: 15–18 min

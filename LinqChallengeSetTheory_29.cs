@@ -49,9 +49,9 @@ public class LinqChallengeSetTheory_29
         //CommonProductsBetweenVendors_T1_New();
         //DiscontinuedProcurements_T2();
         //DiscontinuedProcurements_T2_New();
-        TopRatedStillAvailableProducts_T3();
-        TopRatedStillAvailableProducts_T3_WithScore();
-        //RegionWiseDistinctCategories_T4();
+        //TopRatedStillAvailableProducts_T3();
+        //TopRatedStillAvailableProducts_T3_WithScore();
+        RegionWiseDistinctCategories_T4();
     }
 
     // 🔹 Task 1: Common Products Between Vendors Show products that are offered by both Vendor 1 and Vendor 3
@@ -205,5 +205,33 @@ public class LinqChallengeSetTheory_29
     // 🔹 Task 4: Region-Wise Distinct Categories Supplied Group vendors by region, list distinct
     // product categories they supply
     // Use: GroupJoin, SelectMany, Distinct, Group ⏱️ Expected: 15–18 min
-    private void RegionWiseDistinctCategories_T4() { }
+    // 12:44 - 12:55
+    private void RegionWiseDistinctCategories_T4()
+    {
+        var regionWiseCategories = from vendor in vendors
+                                   join vp in vendorProducts on vendor.VendorId equals vp.VendorId
+                                   join prod in products on vp.ProductId equals prod.ProductId
+
+                                   group new { vendor, prod } by vendor.Region into regionGroup
+
+                                   let vendorCount = regionGroup.Select(x => x.vendor.VendorId).Distinct().Count()
+                                   let categories = regionGroup.Select(x => x.prod.Category).Distinct()
+                                   let categoryCount = categories.Count()
+
+                                   orderby categoryCount descending
+
+                                   select new
+                                   {
+                                       Region = regionGroup.Key,
+                                       VendorCount = vendorCount,
+                                       CategoryCount = categoryCount,
+                                       CategoryList = categories,
+                                       Categories = string.Join(',', categories.OrderBy(x => x))
+                                   };
+
+        foreach (var item in regionWiseCategories)
+        {
+            WriteLine($"{item.Region}\t\tVendors: {item.VendorCount}\t\tCategories: {item.CategoryCount}\t\t[{item.Categories}]"); ;
+        }
+    }
 }

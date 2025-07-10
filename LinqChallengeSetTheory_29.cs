@@ -47,9 +47,10 @@ public class LinqChallengeSetTheory_29
     {
         //CommonProductsBetweenVendors_T1();
         //CommonProductsBetweenVendors_T1_New();
-        DiscontinuedProcurements_T2();
-        DiscontinuedProcurements_T2_New();
-        //TopRatedStillAvailableProducts_T3();
+        //DiscontinuedProcurements_T2();
+        //DiscontinuedProcurements_T2_New();
+        TopRatedStillAvailableProducts_T3();
+        TopRatedStillAvailableProducts_T3_WithScore();
         //RegionWiseDistinctCategories_T4();
     }
 
@@ -151,7 +152,55 @@ public class LinqChallengeSetTheory_29
 
     // 🔹 Task 3: Top Rated Still-Available Products Products with score ≥ 4 and not discontinued
     // Use: Except, GroupBy, Aggregate ⏱️ Expected: 15–18 min
-    private void TopRatedStillAvailableProducts_T3() { }
+    // 12:20 - 12:34
+    private void TopRatedStillAvailableProducts_T3()
+    {
+        var topRatedProds = from prod in products
+                            join review in reviews on prod.ProductId equals review.ProductId
+
+                            group review by prod.ProductId into prodGroup
+                            let avgScore = prodGroup.Average(x => x.Score)
+
+                            where avgScore >= 4
+
+                            orderby avgScore descending
+                            select prodGroup.Key;
+
+        var topRatedAvailableProdIds = topRatedProds.Except(discontinuedProducts.Select(x => x.ProductId));
+        var topRatedAvailableProds = from prod in products
+                                     where topRatedAvailableProdIds.Contains(prod.ProductId)
+                                     select prod;
+        foreach (var item in topRatedAvailableProds)
+        {
+            WriteLine($"{item.ProductId}\t\t{item.Name}");
+        }
+    }
+
+    private void TopRatedStillAvailableProducts_T3_WithScore()
+    {
+        WriteLine();
+        var topRatedAvailableProds = from prod in products
+                                     join review in reviews on prod.ProductId equals review.ProductId
+
+                                     group review by prod into prodGroup
+                                     let avgScore = prodGroup.Average(x => x.Score)
+
+                                     where avgScore >= 4 &&
+                                     !discontinuedProducts.Select(x => x.ProductId).Contains(prodGroup.Key.ProductId)
+
+                                     orderby avgScore descending
+                                     select new
+                                     {
+                                         Product = prodGroup.Key,
+                                         AvgScore = Math.Round(avgScore, 2)
+                                     };
+
+
+        foreach (var item in topRatedAvailableProds)
+        {
+            WriteLine($"{item.Product.ProductId}\t\t{item.Product.Name}\t\tAvg Score:{item.AvgScore}");
+        }
+    }
 
     // 🔹 Task 4: Region-Wise Distinct Categories Supplied Group vendors by region, list distinct
     // product categories they supply

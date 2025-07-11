@@ -44,11 +44,11 @@ public class LinqChallenge_30
 
     public LinqChallenge_30()
     {
-        HighestSpenders_T1();
+        //HighestSpenders_T1();
         HighestSpendersAbove5000_T2();
-        ElectronicsSpendPerStore_T3();
-        MonthlyOrderCounts_T4();
-        RefundImpactByRegion_T5();
+        //ElectronicsSpendPerStore_T3();
+        //MonthlyOrderCounts_T4();
+        //RefundImpactByRegion_T5();
     }
 
     // 🔹 Task 1: Highest Spenders
@@ -83,7 +83,42 @@ public class LinqChallenge_30
     // 🔹 Task 2: Highest Spenders Above $5,000 (Paged)
     // Filter Task 1 result to ≥ $5000, paginate 3 per page
     // ⏱️ Expected: 12–15 min
-    private void HighestSpendersAbove5000_T2() { }
+    // 11:50 - 12:01
+    private void HighestSpendersAbove5000_T2()
+    {
+        var highestSpenders = (from cust in customers
+                               join order in orders on cust.CustomerId equals order.CustomerId
+                               join pay in payments on order.OrderId equals pay.OrderId
+
+                               group new { pay, order } by cust into custGroup
+
+                               let totalPaid = custGroup.Sum(x => x.pay.AmountPaid)
+                               let totalRefunded = custGroup.Where(x => x.pay.Refunded).Sum(x => x.pay.AmountPaid)
+                               let actualPay = totalPaid - totalRefunded
+
+                               where actualPay >= 5000
+                               orderby actualPay descending
+
+                               select new
+                               {
+                                   Customer = custGroup.Key.Name,
+                                   TotalPaid = Math.Round(totalPaid, 2),
+                                   TotalRefunded = Math.Round(totalRefunded, 2),
+                                   ActualPay = Math.Round(actualPay, 2)
+                               }).ToArray();
+        var perPage = 3;
+        for (var pageNum = 0; ;)
+        {
+            var pagedResult = highestSpenders.Skip(pageNum * perPage).Take(perPage);
+            if (!pagedResult.Any())
+                break;
+            WriteLine($"\nPage[ {++pageNum} ]");
+            foreach (var item in pagedResult)
+            {
+                WriteLine($"Customer {item.Customer}\tTotal Paid$: {item.TotalPaid}\tRefunded$: {item.TotalRefunded}\tActual Paid$: {item.ActualPay}");
+            }
+        }
+    }
 
     // 🔹 Task 3: Electronics Spend Per Store
     // Total value of electronics products sold per store (use product category + joins)

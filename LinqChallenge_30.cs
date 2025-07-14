@@ -45,8 +45,8 @@ public class LinqChallenge_30
     public LinqChallenge_30()
     {
         //HighestSpenders_T1();
-        HighestSpendersAbove5000_T2();
-        //ElectronicsSpendPerStore_T3();
+        //HighestSpendersAbove5000_T2();
+        ElectronicsSpendPerStore_T3();
         //MonthlyOrderCounts_T4();
         //RefundImpactByRegion_T5();
     }
@@ -123,7 +123,30 @@ public class LinqChallenge_30
     // 🔹 Task 3: Electronics Spend Per Store
     // Total value of electronics products sold per store (use product category + joins)
     // ⏱️ Expected: 12–15 min
-    private void ElectronicsSpendPerStore_T3() { }
+    // 8:36 - 8:44
+    private void ElectronicsSpendPerStore_T3()
+    {
+        var electronicsPerStore = from order in orders
+                                  join orderItem in orderItems on order.OrderId equals orderItem.OrderId
+                                  join prod in products on orderItem.ProductId equals prod.ProductId
+                                  where prod.Category.Equals("Electronics", StringComparison.OrdinalIgnoreCase)
+
+                                  group new { orderItem, prod } by order.Store into storeGroup
+
+                                  let totalValue = storeGroup.Sum(x => x.orderItem.Quantity * x.prod.UnitPrice)
+                                  orderby totalValue descending
+
+                                  select new
+                                  {
+                                      Store = storeGroup.Key,
+                                      TotalValue = Math.Round(totalValue, 2)
+                                  };
+
+        foreach (var item in electronicsPerStore)
+        {
+            WriteLine($"{item.Store}\t\tTotal Electronic Income ${item.TotalValue}");
+        }
+    }
 
     // 🔹 Task 4: Monthly Order Counts
     // Group orders by Month-Year, show total count per month

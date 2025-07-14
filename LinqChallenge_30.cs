@@ -46,8 +46,8 @@ public class LinqChallenge_30
     {
         //HighestSpenders_T1();
         //HighestSpendersAbove5000_T2();
-        ElectronicsSpendPerStore_T3();
-        //MonthlyOrderCounts_T4();
+        //ElectronicsSpendPerStore_T3();
+        MonthlyOrderCounts_T4();
         //RefundImpactByRegion_T5();
     }
 
@@ -151,7 +151,23 @@ public class LinqChallenge_30
     // 🔹 Task 4: Monthly Order Counts
     // Group orders by Month-Year, show total count per month
     // ⏱️ Expected: 10–12 min
-    private void MonthlyOrderCounts_T4() { }
+    // 8:47 - 8:58
+    private void MonthlyOrderCounts_T4()
+    {
+        var monthlyOrderCounts = from order in orders
+                                 group order.Date by new { order.Date.Year, order.Date.Month } into yearMonthGroup
+                                 orderby yearMonthGroup.Key.Year descending,
+                                    yearMonthGroup.Key.Month descending
+                                 select new
+                                 {
+                                     YearMonth = $"{yearMonthGroup.Key.Year}/{yearMonthGroup.Key.Month}",
+                                     OrdersCount = yearMonthGroup.Count()
+                                 };
+        foreach (var item in monthlyOrderCounts)
+        {
+            WriteLine($"{item.YearMonth}\t\t {item.OrdersCount} orders");
+        }
+    }
 
     // 🔹 Task 5: Refund Impact by Region
     // For each region, show % of total paid that was refunded (aggregate & filter)

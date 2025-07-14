@@ -47,8 +47,8 @@ public class LinqChallenge_30
         //HighestSpenders_T1();
         //HighestSpendersAbove5000_T2();
         //ElectronicsSpendPerStore_T3();
-        MonthlyOrderCounts_T4();
-        //RefundImpactByRegion_T5();
+        //MonthlyOrderCounts_T4();
+        RefundImpactByRegion_T5();
     }
 
     // 🔹 Task 1: Highest Spenders
@@ -172,5 +172,33 @@ public class LinqChallenge_30
     // 🔹 Task 5: Refund Impact by Region
     // For each region, show % of total paid that was refunded (aggregate & filter)
     // ⏱️ Expected: 15–18 min
-    private void RefundImpactByRegion_T5() { }
+    // 9 - 9:09
+    private void RefundImpactByRegion_T5()
+    {
+        var refundImpactByRegion = from cust in customers
+                                   join order in orders on cust.CustomerId equals order.CustomerId
+                                   join payment in payments on order.OrderId equals payment.OrderId
+
+                                   group payment by new { cust.Region } into custGroup
+                                   let refunds = custGroup.Where(x => x.Refunded)
+                                   let totalPayments = custGroup.Sum(x => x.AmountPaid)
+                                   let refundedPayments = refunds.Sum(x => x.AmountPaid)
+                                   let refundsCount = refunds.Count()
+                                   let refundedPercentage = totalPayments > 0 ? (refundedPayments / totalPayments) * 100 : 0.0m
+
+                                   orderby refundedPercentage descending
+                                   select new
+                                   {
+                                       Region = custGroup.Key.Region,
+                                       TotalPayments = Math.Round(totalPayments, 2),
+                                       RefundCount = refundsCount,
+                                       RefundedPayments = Math.Round(refundedPayments, 2),
+                                       RefundedPercentage = Math.Round(refundedPercentage, 2)
+                                   };
+
+        foreach (var item in refundImpactByRegion)
+        {
+            WriteLine($"{item.Region}\t\tTotal Earned ${item.TotalPayments}\t\tRefunded Back ${item.RefundedPayments}\t\tRefunded Percentage {item.RefundedPercentage}%\t\tRefunds Count:{item.RefundCount}");
+        }
+    }
 }

@@ -37,8 +37,8 @@ public class LinqChallenge_31
 
     public LinqChallenge_31()
     {
-        WarehouseStockSummary_T1();
-        //BackorderFrequencyByProduct_T2();
+        //WarehouseStockSummary_T1();
+        BackorderFrequencyByProduct_T2();
         //MonthlyRestockCounts_T3();
         //ElectronicsRotationRate_T4();
         //HighVolumeStockPages_T5();
@@ -77,7 +77,27 @@ public class LinqChallenge_31
     // 🔹 Task 2: Backorder Frequency by Product
     // Count how many shipments for each product were backordered
     // ⏱️ Expected: 10–12 min
-    private void BackorderFrequencyByProduct_T2() { }
+    // 10:37 - 10:41
+    private void BackorderFrequencyByProduct_T2()
+    {
+        var backorderFrequencyByProduct = from prod in products
+                                          join ship in shipments on prod.ProductId equals ship.ProductId
+                                          where ship.Backordered
+                                          group ship by prod into prodGroup
+
+                                          let backOrderCount = prodGroup.Count()
+                                          orderby backOrderCount descending
+
+                                          select new
+                                          {
+                                              Product = prodGroup.Key.Name,
+                                              BackOrderCount = backOrderCount
+                                          };
+        foreach (var item in backorderFrequencyByProduct)
+        {
+            WriteLine($"{item.Product}\t\tBack Order Count : {item.BackOrderCount}");
+        }
+    }
 
     // 🔹 Task 3: Monthly Restock Counts
     // Group shipments by month/year → show total quantity delivered per month

@@ -38,8 +38,8 @@ public class LinqChallenge_31
     public LinqChallenge_31()
     {
         //WarehouseStockSummary_T1();
-        BackorderFrequencyByProduct_T2();
-        //MonthlyRestockCounts_T3();
+        //BackorderFrequencyByProduct_T2();
+        MonthlyRestockCounts_T3();
         //ElectronicsRotationRate_T4();
         //HighVolumeStockPages_T5();
     }
@@ -102,7 +102,30 @@ public class LinqChallenge_31
     // 🔹 Task 3: Monthly Restock Counts
     // Group shipments by month/year → show total quantity delivered per month
     // ⏱️ Expected: 10–13 min
-    private void MonthlyRestockCounts_T3() { }
+    // 10:59 - 11:06
+    private void MonthlyRestockCounts_T3()
+    {
+        var monthlyRestock = from shipment in shipments
+                             group shipment by new { shipment.DateDelivered.Year, shipment.DateDelivered.Month } into shipmentGroup
+
+                             let quantitySum = shipmentGroup.Sum(x => x.Quantity)
+                             let shipmentCounts = shipmentGroup.Count()
+                             let quantityPerShipment = shipmentCounts == 0 ? 0.0 : quantitySum / shipmentCounts
+
+                             orderby quantitySum descending, shipmentGroup.Key.Year descending, shipmentGroup.Key.Month descending
+                             select new
+                             {
+                                 Year = shipmentGroup.Key.Year,
+                                 Month = shipmentGroup.Key.Month,
+                                 QuantitySum = quantitySum,
+                                 ShipmentCounts = shipmentCounts,
+                                 QuantityPerShipment = Math.Round(quantityPerShipment, 2)
+                             };
+        foreach (var item in monthlyRestock)
+        {
+            WriteLine($"{item.Year} - {item.Month}\t\tRestock Count: {item.QuantitySum}\t\tShipments count: {item.ShipmentCounts}\t\tQuantity Per Shipment: {item.QuantityPerShipment}");
+        }
+    }
 
     // 🔹 Task 4: Electronics Rotation Rate
     // For each warehouse → show electronics stock currently held vs received in shipments

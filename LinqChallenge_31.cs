@@ -141,11 +141,12 @@ public class LinqChallenge_31
                                       where prod.Category.Equals("Electronics", StringComparison.OrdinalIgnoreCase)
                                       join shipment in shipments on new { stockItem.WarehouseId, prod.ProductId } equals new { shipment.WarehouseId, shipment.ProductId }
 
-                                      group new { stock, shipment } by wh into warehouseGroup
+                                      group new { stockItem, shipment } by wh into warehouseGroup
 
                                       let shippedCount = warehouseGroup.Sum(x => x.shipment.Quantity)
-                                      let heldCount = warehouseGroup.Sum(x => x.stock.Count)
+                                      let heldCount = warehouseGroup.Sum(x => x.stockItem.Quantity)
                                       let soldCount = shippedCount - heldCount
+                                      let rotationRate = shippedCount > 0 ? Math.Round((decimal)heldCount / shippedCount, 2) : 0.0m
 
                                       orderby shippedCount descending, heldCount descending
 
@@ -155,11 +156,12 @@ public class LinqChallenge_31
                                           ShippedCount = shippedCount,
                                           HeldCount = heldCount,
                                           SoldCount = soldCount,
+                                          RotationRate = rotationRate
                                       };
 
         foreach (var item in electronicsRotationRate)
         {
-            WriteLine($"Warehouse {item.Warehouse.WarehouseId}\t\t At: {item.Warehouse.Location}\t\tElectronics Shipped: {item.ShippedCount}\t\tElectronics Held: {item.HeldCount}\t\tSold Count: {item.SoldCount}");
+            WriteLine($"Warehouse {item.Warehouse.WarehouseId}\t\t At: {item.Warehouse.Location}\t\tElectronics Shipped: {item.ShippedCount}\t\tElectronics Held: {item.HeldCount}\t\tSold Count: {item.SoldCount}\t\tRotation Rate: {item.RotationRate}");
         }
     }
 

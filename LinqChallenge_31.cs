@@ -35,12 +35,14 @@ public class LinqChallenge_31
         (307, 3, 101, new(2024,3,10), 5, true)
     };
 
+
+
     public LinqChallenge_31()
     {
         //WarehouseStockSummary_T1();
         //BackorderFrequencyByProduct_T2();
-        MonthlyRestockCounts_T3();
-        //ElectronicsRotationRate_T4();
+        //MonthlyRestockCounts_T3();
+        ElectronicsRotationRate_T4();
         //HighVolumeStockPages_T5();
     }
 
@@ -130,7 +132,36 @@ public class LinqChallenge_31
     // 🔹 Task 4: Electronics Rotation Rate
     // For each warehouse → show electronics stock currently held vs received in shipments
     // ⏱️ Expected: 15–18 min
-    private void ElectronicsRotationRate_T4() { }
+    // 11:13 - 11:27
+    private void ElectronicsRotationRate_T4()
+    {
+        var electronicsRotationRate = from wh in warehouses
+                                      join stockItem in stock on wh.WarehouseId equals stockItem.WarehouseId
+                                      join prod in products on stockItem.ProductId equals prod.ProductId
+                                      where prod.Category.Equals("Electronics", StringComparison.OrdinalIgnoreCase)
+                                      join shipment in shipments on new { stockItem.WarehouseId, prod.ProductId } equals new { shipment.WarehouseId, shipment.ProductId }
+
+                                      group new { stock, shipment } by wh into warehouseGroup
+
+                                      let shippedCount = warehouseGroup.Sum(x => x.shipment.Quantity)
+                                      let heldCount = warehouseGroup.Sum(x => x.stock.Count)
+                                      let soldCount = shippedCount - heldCount
+
+                                      orderby shippedCount descending, heldCount descending
+
+                                      select new
+                                      {
+                                          Warehouse = warehouseGroup.Key,
+                                          ShippedCount = shippedCount,
+                                          HeldCount = heldCount,
+                                          SoldCount = soldCount,
+                                      };
+
+        foreach (var item in electronicsRotationRate)
+        {
+            WriteLine($"Warehouse {item.Warehouse.WarehouseId}\t\t At: {item.Warehouse.Location}\t\tElectronics Shipped: {item.ShippedCount}\t\tElectronics Held: {item.HeldCount}\t\tSold Count: {item.SoldCount}");
+        }
+    }
 
     // 🔹 Task 5: High-Volume Stock Pages
     // Paginate list of products with total stock quantity ≥ 40 → sorted by total quantity

@@ -42,8 +42,41 @@ public class LinqChallenge_31
         //WarehouseStockSummary_T1();
         //BackorderFrequencyByProduct_T2();
         //MonthlyRestockCounts_T3();
-        ElectronicsRotationRate_T4();
-        //HighVolumeStockPages_T5();
+        //ElectronicsRotationRate_T4();
+        HighVolumeStockPages_T5();
+    }
+
+    // 🔹 Task 5: High-Volume Stock Pages
+    // Paginate list of products with total stock quantity ≥ 40 → sorted by total quantity
+    // ⏱️ Expected: 12–15 min
+    // 11:38 - 11:46
+    private void HighVolumeStockPages_T5()
+    {
+        var highVolumeStockPages = (from prod in products
+                                    join stockItem in stock on prod.ProductId equals stockItem.ProductId
+                                    group stockItem by prod into prodGroup
+                                    let totalStockQty = prodGroup.Sum(x => x.Quantity)
+                                    where totalStockQty >= 40
+                                    orderby totalStockQty descending
+                                    select new
+                                    {
+                                        Product = prodGroup.Key.Name,
+                                        TotalStockQty = totalStockQty
+                                    }).ToList();
+
+        var itemsPerPage = 2;
+        for (var pageNum = 0; ;)
+        {
+            var pagedResult = highVolumeStockPages.Skip(pageNum * itemsPerPage).Take(itemsPerPage);
+            if (!pagedResult.Any())
+                break;
+            WriteLine($"\n\nPage[ {++pageNum} ]");
+            foreach (var item in pagedResult)
+            {
+                WriteLine($"{item.Product}\t\tTotal Stock: {item.TotalStockQty}");
+            }
+
+        }
     }
 
     // 🔹 Task 1: Warehouse Stock Summary
@@ -165,8 +198,5 @@ public class LinqChallenge_31
         }
     }
 
-    // 🔹 Task 5: High-Volume Stock Pages
-    // Paginate list of products with total stock quantity ≥ 40 → sorted by total quantity
-    // ⏱️ Expected: 12–15 min
-    private void HighVolumeStockPages_T5() { }
+
 }

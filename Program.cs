@@ -49,7 +49,7 @@ public class Program
 
         //new LinqChallengeSetTheory_29();
         //new LinqChallenge_30();
-        new LinqChallenge_31();
+        //new LinqChallenge_31();
     }
 
 

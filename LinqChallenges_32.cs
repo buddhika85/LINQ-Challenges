@@ -32,8 +32,8 @@ public class LinqChallengeBehavioralOps
 
     public LinqChallengeBehavioralOps()
     {
-        RepeatCustomerSpend_T1();
-        //SupplierDeliveryFrequency_T2();
+        //RepeatCustomerSpend_T1();
+        SupplierDeliveryFrequency_T2();
         //CategoryVelocity_T3();
         //MonthlyNewCustomerEngagement_T4();
         //TopCategoriesByVolume_T5();
@@ -74,7 +74,31 @@ public class LinqChallengeBehavioralOps
     // 🔹 Task 2: Supplier Delivery Frequency
     // Show delivery count and total quantity per supplier, ordered by delivery count descending
     // ⏱️ Expected: 12–15 min
-    private void SupplierDeliveryFrequency_T2() { }
+    // 5:20 - 5:27
+    private void SupplierDeliveryFrequency_T2()
+    {
+        var supplierDeliveryFrequency = from supp in suppliers
+                                        join deli in deliveries on supp.SupplierId equals deli.SupplierId
+                                        group deli by supp into suppGroup
+
+                                        let deliveryCount = suppGroup.Count()
+                                        let totalQuantity = suppGroup.Sum(x => x.Quantity)
+                                        let avgQuantity = deliveryCount > 0 ? suppGroup.Average(x => x.Quantity) : 0.0
+
+                                        orderby deliveryCount descending, suppGroup.Key.Name
+
+                                        select new
+                                        {
+                                            Supplier = suppGroup.Key.Name,
+                                            DeliveryCount = deliveryCount,
+                                            TotalQuantity = totalQuantity,
+                                            AvgQuantity = Math.Round(avgQuantity, 2)
+                                        };
+        foreach (var item in supplierDeliveryFrequency)
+        {
+            WriteLine($"{item.Supplier}\t\tTotal Delivery Count: {item.DeliveryCount}\t\tTotal Quantity: {item.TotalQuantity}\t\tAverage Quantity: {item.AvgQuantity}");
+        }
+    }
 
     // 🔹 Task 3: Category Velocity
     // For each product category, show average quantity per delivery and number of suppliers involved

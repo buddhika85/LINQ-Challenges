@@ -34,8 +34,8 @@ public class LinqChallengeBehavioralOps
     {
         //RepeatCustomerSpend_T1();
         //SupplierDeliveryFrequency_T2();
-        CategoryVelocity_T3();
-        //MonthlyNewCustomerEngagement_T4();
+        //CategoryVelocity_T3();
+        MonthlyNewCustomerEngagement_T4();
         //TopCategoriesByVolume_T5();
     }
 
@@ -136,7 +136,28 @@ public class LinqChallengeBehavioralOps
     // 🔹 Task 4: Monthly New Customer Engagement
     // Count new customers per month based on `FirstOrderDate`
     // ⏱️ Expected: 10–12 min
-    private void MonthlyNewCustomerEngagement_T4() { }
+    // 10;21 - 
+    private void MonthlyNewCustomerEngagement_T4()
+    {
+        var query = from cust in customers
+                    let firstOrderMonth = cust.FirstOrderDate.Month
+                    let firstOrderYear = cust.FirstOrderDate.Year
+
+                    group cust by new { firstOrderYear, firstOrderMonth } into yearMonthGroup
+
+                    orderby yearMonthGroup.Key.firstOrderYear, yearMonthGroup.Key.firstOrderMonth descending
+
+                    select new
+                    {
+                        YearMonth = $"{yearMonthGroup.Key.firstOrderYear} - {yearMonthGroup.Key.firstOrderMonth}",
+                        NewCustomerCount = yearMonthGroup.Count()
+                    };
+
+        foreach (var item in query)
+        {
+            WriteLine($"{item.YearMonth} \t\t New Customer Count: {item.NewCustomerCount}");
+        }
+    }
 
     // 🔹 Task 5: Top Categories by Volume (Paged)
     // Group by product category, sum quantities, order descending, paginate 3 per page

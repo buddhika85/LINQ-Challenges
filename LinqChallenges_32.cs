@@ -33,8 +33,8 @@ public class LinqChallengeBehavioralOps
     public LinqChallengeBehavioralOps()
     {
         //RepeatCustomerSpend_T1();
-        SupplierDeliveryFrequency_T2();
-        //CategoryVelocity_T3();
+        //SupplierDeliveryFrequency_T2();
+        CategoryVelocity_T3();
         //MonthlyNewCustomerEngagement_T4();
         //TopCategoriesByVolume_T5();
     }
@@ -103,7 +103,35 @@ public class LinqChallengeBehavioralOps
     // 🔹 Task 3: Category Velocity
     // For each product category, show average quantity per delivery and number of suppliers involved
     // ⏱️ Expected: 15–18 min
-    private void CategoryVelocity_T3() { }
+    // 9:52 - 10:02
+    private void CategoryVelocity_T3()
+    {
+        var query = from del in deliveries
+                    join supp in suppliers on del.SupplierId equals supp.SupplierId
+                    group new { del, supp } by del.ProductCategory into cateGroup
+
+                    let avgQty = cateGroup.Average(x => x.del.Quantity)
+                    let totQty = cateGroup.Sum(x => x.del.Quantity)
+                    let minQty = cateGroup.Min(x => x.del.Quantity)
+                    let maxQty = cateGroup.Max(x => x.del.Quantity)
+                    let countSupp = cateGroup.Select(x => x.supp.SupplierId).Distinct().Count()
+
+                    orderby avgQty descending, cateGroup.Key
+
+                    select new
+                    {
+                        Category = cateGroup.Key,
+                        CountSuppliers = countSupp,
+                        AvgQty = Math.Round(avgQty, 2),
+                        TotQty = totQty,
+                        MinQty = minQty,
+                        MaxQty = maxQty
+                    };
+        foreach (var item in query)
+        {
+            WriteLine($"{item.Category}\t\tSuppliers: {item.CountSuppliers}\t\tAvg Qty: {item.AvgQty}\t\tMin Qty: {item.MinQty}\t\tMax Qty: {item.MaxQty}\t\tTotal Qty: {item.TotQty}");
+        }
+    }
 
     // 🔹 Task 4: Monthly New Customer Engagement
     // Count new customers per month based on `FirstOrderDate`

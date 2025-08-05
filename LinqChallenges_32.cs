@@ -35,8 +35,8 @@ public class LinqChallengeBehavioralOps
         //RepeatCustomerSpend_T1();
         //SupplierDeliveryFrequency_T2();
         //CategoryVelocity_T3();
-        MonthlyNewCustomerEngagement_T4();
-        //TopCategoriesByVolume_T5();
+        //MonthlyNewCustomerEngagement_T4();
+        TopCategoriesByVolume_T5();
     }
 
     // 🔹 Task 1: Repeat Customer Spend
@@ -136,7 +136,7 @@ public class LinqChallengeBehavioralOps
     // 🔹 Task 4: Monthly New Customer Engagement
     // Count new customers per month based on `FirstOrderDate`
     // ⏱️ Expected: 10–12 min
-    // 10;21 - 
+    // 10;21 - 10:29
     private void MonthlyNewCustomerEngagement_T4()
     {
         var query = from cust in customers
@@ -162,5 +162,32 @@ public class LinqChallengeBehavioralOps
     // 🔹 Task 5: Top Categories by Volume (Paged)
     // Group by product category, sum quantities, order descending, paginate 3 per page
     // ⏱️ Expected: 12–15 min
-    private void TopCategoriesByVolume_T5() { }
+    // 10:35 - 10:42
+    private void TopCategoriesByVolume_T5()
+    {
+        var list = (from deli in deliveries
+                    group deli by deli.ProductCategory into cateGroup
+
+                    let sumQty = cateGroup.Sum(x => x.Quantity)
+                    orderby sumQty descending
+                    select new
+                    {
+                        Category = cateGroup.Key,
+                        SumQty = sumQty,
+                    }).ToList();
+
+        var perPage = 3;
+
+        for (var pageNum = 0; ;)
+        {
+            var pagedResult = list.Skip(pageNum * perPage).Take(perPage);
+            if (!pagedResult.Any())
+                break;
+            WriteLine($"\nPage [ {++pageNum} ] ");
+            foreach (var item in pagedResult)
+            {
+                WriteLine($"\t{item.Category}\t\tSum Quntity: {item.SumQty}");
+            }
+        }
+    }
 }

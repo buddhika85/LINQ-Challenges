@@ -1,4 +1,6 @@
-﻿namespace LINQ_Challeges;
+﻿using static System.Console;
+
+namespace LINQ_Challeges;
 
 public class LinqChallenge_33
 {
@@ -27,17 +29,47 @@ public class LinqChallenge_33
     public LinqChallenge_33()
     {
         SalaryAggregationByRole_T1();
-        DepartmentEmployeeMap_T2();
-        LeftJoinDepartmentProjects_T3();
-        ProjectAssignmentMatrix_T4();
-        EmployeeActivityPaging_T5();
+        //DepartmentEmployeeMap_T2();
+        //LeftJoinDepartmentProjects_T3();
+        //ProjectAssignmentMatrix_T4();
+        //EmployeeActivityPaging_T5();
     }
 
     // 🔹 Task 1: Salary Aggregation by Role and Department
     // Group by DeptId + Role → Sum, Avg, Count, Min, Max
     // ⏱️ Expected: 15–18 min
+    // 3:40 - 3:53
     private void SalaryAggregationByRole_T1()
     {
+        var query = from emp in employees
+                    join dept in departments on emp.DeptId equals dept.DeptId
+                    group new { emp, dept } by new { emp.DeptId, emp.Role } into roleGroup
+
+                    let department = roleGroup.Select(x => x.dept).FirstOrDefault()
+                    let departmentName = department.Name ?? "Unknown"
+                    let sumSalary = roleGroup.Sum(x => x.emp.Salary)
+                    let avgSalary = roleGroup.Average(x => x.emp.Salary)
+                    let countEmps = roleGroup.Count()
+                    let minSalary = roleGroup.Min(x => x.emp.Salary)
+                    let maxSalary = roleGroup.Max(x => x.emp.Salary)
+
+                    orderby countEmps descending
+
+                    select new
+                    {
+                        Role = $"{departmentName} - {roleGroup.Key.Role}",
+                        Department = departmentName,
+                        EmployeesCount = countEmps,
+                        SumSalary = Math.Round(sumSalary, 2),
+                        AvgSalary = Math.Round(avgSalary, 2),
+                        MinSalary = Math.Round(minSalary, 2),
+                        MaxSalary = Math.Round(maxSalary, 2),
+                    };
+        foreach (var item in query)
+        {
+            WriteLine($"{item.Role}\t\tDepartment: {item.Department}\t\tEmployees Count: {item.EmployeesCount}\nSalaries:");
+            WriteLine($"\t\tSum $:{item.SumSalary}\t\tAvg:{item.AvgSalary}\t\tMin: {item.MinSalary}\t\t Max: {item.MaxSalary}\n");
+        }
     }
 
     // 🔹 Task 2: Department with Employee Lists

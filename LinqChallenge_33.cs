@@ -28,8 +28,8 @@ public class LinqChallenge_33
 
     public LinqChallenge_33()
     {
-        SalaryAggregationByRole_T1();
-        //DepartmentEmployeeMap_T2();
+        //SalaryAggregationByRole_T1();
+        DepartmentEmployeeMap_T2();
         //LeftJoinDepartmentProjects_T3();
         //ProjectAssignmentMatrix_T4();
         //EmployeeActivityPaging_T5();
@@ -75,7 +75,65 @@ public class LinqChallenge_33
     // 🔹 Task 2: Department with Employee Lists
     // Project departments → nested employee projections
     // ⏱️ Expected: 12–15 min
-    private void DepartmentEmployeeMap_T2() { }
+    // 9:07 - 9:20
+    private void DepartmentEmployeeMap_T2()
+    {
+        // INNER JOIN
+        //var query = from dept in departments
+        //            join emp in employees on dept.DeptId equals emp.DeptId
+        //            group emp by dept into deptGroup
+
+        //            let empCount = deptGroup.Count()
+        //            let department = deptGroup.Key
+        //            let avgSalary = deptGroup.Average(x => x.Salary)
+        //            let employees = deptGroup.OrderByDescending(x => x.Salary).ThenBy(x => x.Name)
+
+        //            orderby empCount descending, department.Name
+
+        //            select new
+        //            {
+        //                DepartmentId = department.DeptId,
+        //                Department = department.Name,
+        //                AvgSalary = Math.Round(avgSalary, 2),
+        //                EmployeesCount = empCount,
+        //                Employees = employees
+        //            };
+
+        // LEFT Join
+        var query = from dept in departments
+                    join emp in employees on dept.DeptId equals emp.DeptId into deptGroup
+
+                    from emp in deptGroup.DefaultIfEmpty()                                          // left join, emp list is null(default) if empty
+
+                    let empCount = deptGroup?.Count() ?? 0
+                    let department = dept
+                    let avgSalary = deptGroup.Any() ? Math.Round(deptGroup.Average(x => x.Salary), 2) : 0.00m
+                    let employees = deptGroup?.OrderByDescending(x => x.Salary)?.ThenBy(x => x.Name)
+
+                    orderby empCount descending, department.Name
+
+                    select new
+                    {
+                        DepartmentId = department.DeptId,
+                        Department = department.Name,
+                        AvgSalary = avgSalary,
+                        EmployeesCount = empCount,
+                        Employees = employees
+                    };
+
+        foreach (var item in query)
+        {
+            WriteLine($"\nID: {item.DepartmentId} {item.Department} Has {item.EmployeesCount} Employees. AvgSalary: ${item.AvgSalary}");
+            if (item.EmployeesCount > 0)
+            {
+                WriteLine("\tEmployee List:");
+                foreach (var emp in item.Employees)
+                {
+                    WriteLine($"\t\tID: {emp.EmpId}\t{emp.Name}\t\tRole: {emp.Role}\t\tSalary: {Math.Round(emp.Salary, 2)}");
+                }
+            }
+        }
+    }
 
     // 🔹 Task 3: Left Join Departments & Projects
     // Use GroupJoin + DefaultIfEmpty → list projects per dept (handle no-project depts)

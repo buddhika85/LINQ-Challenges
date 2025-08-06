@@ -51,7 +51,8 @@ public class Program
         //new LinqChallenge_30();
         //new LinqChallenge_31();
 
-        new LinqChallengeBehavioralOps();
+        //new LinqChallengeBehavioralOps();
+        new LinqChallenge_33();
     }
 
 

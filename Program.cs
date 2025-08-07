@@ -52,7 +52,11 @@ public class Program
         //new LinqChallenge_31();
 
         //new LinqChallengeBehavioralOps();
-        new LinqChallenge_33();
+
+        new LeftRightJoinSimulation().DisplayAllDepartmentsWithAnyAssociatedEmployees();
+
+
+        //new LinqChallenge_33();
     }
 
 

@@ -2,6 +2,31 @@
 
 namespace LINQ_Challeges;
 
+
+/*
+ 
+ ❌ LINQ Does Not Support Right Joins Directly
+LINQ (especially the query syntax) only supports left joins natively. There’s no built-in keyword or syntax for a right join.
+
+But here’s the trick:
+You can simulate a right join by reversing the direction of a left join.
+
+So instead of:
+
+from A in Left
+join B in Right on A.Id equals B.RefId into Group
+from B in Group.DefaultIfEmpty()                                    // --> gives dafault NULL for Left records which does have atleast 1 Right record
+
+from B in Right
+join A in Left on B.RefId equals A.Id into Group
+from A in Group.DefaultIfEmpty()
+
+
+✅ DefaultIfEmpty() Is the Key to Outer Joins
+Whether you're doing a left join or simulating a right join, DefaultIfEmpty() is what allows you to include records even when there’s no match on the other side.
+
+ */
+
 public class LeftRightJoinSimulation
 {
     private readonly IEnumerable<Department> departments =
@@ -79,7 +104,7 @@ public class LeftRightJoinSimulation
         var query = from emp in employees
                     join dept in departments on emp.DeptId equals dept.Id into deptGroup
 
-                    from dept in deptGroup.DefaultIfEmpty()
+                    from dept in deptGroup.DefaultIfEmpty()                     // get left records which does not have any right record
 
                     select new
                     {

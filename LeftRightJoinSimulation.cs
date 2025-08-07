@@ -59,7 +59,8 @@ public class LeftRightJoinSimulation
         }
     }
 
-    // Departments right join Employees
+    // LINQ DOES NOT support right join
+    // Employees left join Departments
     // Expected
     /*
                 ID: 1   Name: Alice     Dept Id: 1      Department: HR
@@ -75,7 +76,21 @@ public class LeftRightJoinSimulation
      */
     public void DisplayAllEmployeesWithAnyAssociatedDepartments()
     {
+        var query = from emp in employees
+                    join dept in departments on emp.DeptId equals dept.Id into deptGroup
 
+                    from dept in deptGroup.DefaultIfEmpty()
+
+                    select new
+                    {
+                        Employee = emp,
+                        DeptId = dept?.Id.ToString() ?? "-",
+                        DeptName = dept?.Name ?? "-",
+                    };
+        foreach (var item in query)
+        {
+            WriteLine($"{item.Employee.Id}\tName: {item.Employee.Name}\tDept Id: {item.DeptId}\tDepartment: {item.DeptName}");
+        }
     }
 
     private class Department

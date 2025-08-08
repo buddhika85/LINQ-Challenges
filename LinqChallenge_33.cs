@@ -29,8 +29,8 @@ public class LinqChallenge_33
     public LinqChallenge_33()
     {
         //SalaryAggregationByRole_T1();
-        DepartmentEmployeeMap_T2();
-        //LeftJoinDepartmentProjects_T3();
+        //DepartmentEmployeeMap_T2();
+        LeftJoinDepartmentProjects_T3();
         //ProjectAssignmentMatrix_T4();
         //EmployeeActivityPaging_T5();
     }
@@ -138,7 +138,41 @@ public class LinqChallenge_33
     // 🔹 Task 3: Left Join Departments & Projects
     // Use GroupJoin + DefaultIfEmpty → list projects per dept (handle no-project depts)
     // ⏱️ Expected: 15–18 min
-    private void LeftJoinDepartmentProjects_T3() { }
+    // 11:37 - 11:49
+    private void LeftJoinDepartmentProjects_T3()
+    {
+        var query = from dept in departments
+                    join proj in projects on dept.DeptId equals proj.DeptId into deptGroup
+
+
+
+                    let projectCount = deptGroup?.Count() ?? 0
+
+                    orderby projectCount descending
+
+                    select new
+                    {
+                        Department = dept,
+                        ProjectCount = projectCount,
+                        Projects = deptGroup?.OrderBy(x => x.Title).ToList() ?? null
+                    };
+
+        foreach (var item in query)
+        {
+            WriteLine($"\nID: {item.Department.DeptId}\t\tDepartment: {item.Department.Name}\t\tProjects: {item.ProjectCount}");
+            if (item.Projects != null)
+            {
+                foreach (var project in item.Projects)
+                {
+                    WriteLine($"\tProject ID: {project.ProjectId}\t\tProject: {project.Title}");
+                }
+            }
+            else
+            {
+                WriteLine("\tNo projects to display");
+            }
+        }
+    }
 
     // 🔹 Task 4: Assignment Cross Matrix
     // Create matrix of Emp × Project (cross join style), mark assigned vs not

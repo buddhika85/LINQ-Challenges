@@ -178,48 +178,24 @@ public class LinqChallenge_33
     // 8:45 - 8:59
     private void ProjectAssignmentMatrix_T4()
     {
-        //var assignmentsWithEmployeeProjects = from emp in employees
-        //                                      join assignment in assignments on emp.EmpId equals assignment.EmpId into empGroup
-        //                                      from assignment in empGroup.DefaultIfEmpty()
-        //                                      join proj in projects on assignment.ProjectId equals proj.ProjectId into projGroup
-        //                                      from proj in projGroup.DefaultIfEmpty()
+        var crossJoin = from emp in employees
+                        from proj in projects
+                        let isAssigned = assignments.Any(x => x.EmpId == emp.EmpId && x.ProjectId == proj.ProjectId)
 
-        //                                      orderby projGroup.Count() descending, emp.EmpId
+                        orderby emp.EmpId, isAssigned
 
-        //                                      select new
-        //                                      {
-        //                                          Employee = emp,
-        //                                          Project = proj
-        //                                      };
+                        select new
+                        {
+                            Employee = emp,
+                            Project = proj,
+                            IsAssigned = isAssigned
+                        };
 
-        //foreach (var item in assignmentsWithEmployeeProjects)
-        //{
-        //    WriteLine($"\nID: {item.Employee.EmpId}\t\t{item.Employee.Name} Projects.");
-        //    if (item.Project.ProjectId == 0)
-        //    {
-        //        WriteLine("\t\tNo Projects");
-        //    }
-        //    else
-        //    {
-        //        WriteLine($"\t\tProject ID: {item.Project.ProjectId}\t\tProject: {item.Project.Title}");
-        //    }
-        //}
-
-        var matrix = from emp in employees
-                     from proj in projects
-                     let isAssigned = assignments.Any(a => a.EmpId == emp.EmpId && a.ProjectId == proj.ProjectId)
-                     orderby emp.EmpId, proj.ProjectId
-                     select new
-                     {
-                         Employee = emp,
-                         Project = proj,
-                         IsAssigned = isAssigned
-                     };
-
-        foreach (var item in matrix)
+        foreach (var item in crossJoin)
         {
-            WriteLine($"\nID: {item.Employee.EmpId}\t{item.Employee.Name}");
-            WriteLine($"\tProject ID: {item.Project.ProjectId}\tProject: {item.Project.Title}\tAssigned: {(item.IsAssigned ? "✅" : "❌")}");
+            WriteLine($"\nEmp ID: {item.Employee.EmpId}\t\tName: {item.Employee.Name}");
+            WriteLine($"\tProject ID: {item.Project.ProjectId}\tProject: {item.Project.Title}\tAssigned: {(item.IsAssigned ? "YES" : "NO")}");
+
         }
     }
 

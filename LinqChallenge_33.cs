@@ -30,8 +30,8 @@ public class LinqChallenge_33
     {
         //SalaryAggregationByRole_T1();
         //DepartmentEmployeeMap_T2();
-        LeftJoinDepartmentProjects_T3();
-        //ProjectAssignmentMatrix_T4();
+        //LeftJoinDepartmentProjects_T3();
+        ProjectAssignmentMatrix_T4();
         //EmployeeActivityPaging_T5();
     }
 
@@ -144,8 +144,6 @@ public class LinqChallenge_33
         var query = from dept in departments
                     join proj in projects on dept.DeptId equals proj.DeptId into deptGroup
 
-
-
                     let projectCount = deptGroup?.Count() ?? 0
 
                     orderby projectCount descending
@@ -177,7 +175,53 @@ public class LinqChallenge_33
     // 🔹 Task 4: Assignment Cross Matrix
     // Create matrix of Emp × Project (cross join style), mark assigned vs not
     // ⏱️ Expected: 12–14 min
-    private void ProjectAssignmentMatrix_T4() { }
+    // 8:45 - 8:59
+    private void ProjectAssignmentMatrix_T4()
+    {
+        //var assignmentsWithEmployeeProjects = from emp in employees
+        //                                      join assignment in assignments on emp.EmpId equals assignment.EmpId into empGroup
+        //                                      from assignment in empGroup.DefaultIfEmpty()
+        //                                      join proj in projects on assignment.ProjectId equals proj.ProjectId into projGroup
+        //                                      from proj in projGroup.DefaultIfEmpty()
+
+        //                                      orderby projGroup.Count() descending, emp.EmpId
+
+        //                                      select new
+        //                                      {
+        //                                          Employee = emp,
+        //                                          Project = proj
+        //                                      };
+
+        //foreach (var item in assignmentsWithEmployeeProjects)
+        //{
+        //    WriteLine($"\nID: {item.Employee.EmpId}\t\t{item.Employee.Name} Projects.");
+        //    if (item.Project.ProjectId == 0)
+        //    {
+        //        WriteLine("\t\tNo Projects");
+        //    }
+        //    else
+        //    {
+        //        WriteLine($"\t\tProject ID: {item.Project.ProjectId}\t\tProject: {item.Project.Title}");
+        //    }
+        //}
+
+        var matrix = from emp in employees
+                     from proj in projects
+                     let isAssigned = assignments.Any(a => a.EmpId == emp.EmpId && a.ProjectId == proj.ProjectId)
+                     orderby emp.EmpId, proj.ProjectId
+                     select new
+                     {
+                         Employee = emp,
+                         Project = proj,
+                         IsAssigned = isAssigned
+                     };
+
+        foreach (var item in matrix)
+        {
+            WriteLine($"\nID: {item.Employee.EmpId}\t{item.Employee.Name}");
+            WriteLine($"\tProject ID: {item.Project.ProjectId}\tProject: {item.Project.Title}\tAssigned: {(item.IsAssigned ? "✅" : "❌")}");
+        }
+    }
 
     // 🔹 Task 5: Paginate Top Employees by Activity
     // Order employees by project count descending, take 3 per page

@@ -182,7 +182,7 @@ public class LinqChallenge_33
                         from proj in projects
                         let isAssigned = assignments.Any(x => x.EmpId == emp.EmpId && x.ProjectId == proj.ProjectId)
 
-                        orderby emp.EmpId, isAssigned
+                        orderby emp.EmpId, isAssigned descending
 
                         select new
                         {

@@ -31,8 +31,8 @@ public class LinqChallenge_33
         //SalaryAggregationByRole_T1();
         //DepartmentEmployeeMap_T2();
         //LeftJoinDepartmentProjects_T3();
-        ProjectAssignmentMatrix_T4();
-        //EmployeeActivityPaging_T5();
+        //ProjectAssignmentMatrix_T4();
+        EmployeeActivityPaging_T5();
     }
 
     // 🔹 Task 1: Salary Aggregation by Role and Department
@@ -202,5 +202,52 @@ public class LinqChallenge_33
     // 🔹 Task 5: Paginate Top Employees by Activity
     // Order employees by project count descending, take 3 per page
     // ⏱️ Expected: 12–15 min
-    private void EmployeeActivityPaging_T5() { }
+    // 11:24 - 11:41
+    private void EmployeeActivityPaging_T5()
+    {
+        var employeeByProjectCount = (from emp in employees
+                                      join assignment in assignments on emp.EmpId equals assignment.EmpId into empGroup
+
+                                      let projCount = empGroup.Count()
+                                      let projectIds = empGroup.Select(x => x.ProjectId).ToList()
+
+                                      orderby projCount descending, emp.Name
+
+                                      select new
+                                      {
+                                          Employee = emp,
+                                          ProjectCount = projCount,
+                                          ProjectIds = projectIds
+                                      }).ToList();
+
+        var perPage = 3;
+        var totalPages = (int)Math.Ceiling((double)employeeByProjectCount.Count() / perPage);
+
+        for (var pageNum = 0; ;)
+        {
+            var pagedData = employeeByProjectCount.Skip(pageNum * perPage).Take(perPage);
+            if (!pagedData.Any())
+                break;
+            WriteLine($"\n\nPage [ {++pageNum} ] of total {totalPages} pages");
+            foreach (var item in pagedData)
+            {
+                WriteLine($"\nID: {item.Employee.EmpId}\t\t{item.Employee.Name}\t\tProject Count: {item.ProjectCount}");
+                if (item.ProjectCount > 0)
+                {
+                    var workingProjects = from proj in projects
+                                          join projId in item.ProjectIds on proj.ProjectId equals projId
+                                          orderby projId
+                                          select proj;
+                    foreach (var proj in workingProjects)
+                    {
+                        WriteLine($"\t\tProject ID: {proj.ProjectId}\t\tProject Name: {proj.Title}");
+                    }
+                }
+                else
+                {
+                    WriteLine("\t\tNo projects to display");
+                }
+            }
+        }
+    }
 }

@@ -56,7 +56,8 @@ public class Program
         //new LeftRightJoinSimulation().DisplayAllDepartmentsWithAnyAssociatedEmployees();        // Left join
         //new LeftRightJoinSimulation().DisplayAllEmployeesWithAnyAssociatedDepartments();        // LINQ DOES NOT support right join, so use left JOIN instead
 
-        new LinqChallenge_33();
+        //new LinqChallenge_33();
+        new LinqChallenge_34();
     }
 
 

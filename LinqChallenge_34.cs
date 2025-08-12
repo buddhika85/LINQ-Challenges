@@ -4,15 +4,84 @@ namespace LINQ_Challeges;
 
 public class LinqChallenge_34
 {
-    private List<(int CustomerId, string Name, string Region)> customers = new() { /* ... */ };
-    private List<(int OrderId, int CustomerId, DateTime OrderDate, decimal Amount)> orders = new() { /* ... */ };
-    private List<(int ProductId, string Name, string Category, decimal Price)> products = new() { /* ... */ };
-    private List<(int OrderId, int ProductId, int Quantity)> orderItems = new() { /* ... */ };
-    private List<(int WarehouseId, string Location)> warehouses = new() { /* ... */ };
-    private List<(int ShipmentId, int WarehouseId, int ProductId, DateTime Date, int Quantity)> shipments = new() { /* ... */ };
-    private Queue<(DateTime Timestamp, string EventType, string Message)> systemLogs = new(); // FIFO log stream
-    private HashSet<int> flaggedCustomerIds = new(); // For fraud detection
-    private Dictionary<int, List<int>> productAdjacency = new(); // Simulated graph: product recommendations
+    private List<(int CustomerId, string Name, string Region)> customers = new()
+    {
+        (1, "Alice", "NSW"),
+        (2, "Bob", "VIC"),
+        (3, "Charlie", "QLD"),
+        (4, "Diana", "NSW"),
+        (5, "Ethan", "WA")
+    };
+
+    private List<(int OrderId, int CustomerId, DateTime OrderDate, decimal Amount)> orders = new()
+    {
+        (101, 1, new DateTime(2025, 7, 1), 1200),
+        (102, 2, new DateTime(2025, 7, 2), 5400),
+        (103, 3, new DateTime(2025, 7, 3), 300),
+        (104, 1, new DateTime(2025, 7, 4), 800),
+        (105, 4, new DateTime(2025, 7, 5), 6200),
+        (106, 5, new DateTime(2025, 7, 6), 150),
+        (107, 2, new DateTime(2025, 7, 7), 4700)
+    };
+
+    private List<(int ProductId, string Name, string Category, decimal Price)> products = new()
+    {
+        (201, "Laptop", "Electronics", 1500),
+        (202, "Phone", "Electronics", 800),
+        (203, "Desk", "Furniture", 300),
+        (204, "Chair", "Furniture", 150),
+        (205, "Monitor", "Electronics", 400)
+    };
+
+    private List<(int OrderId, int ProductId, int Quantity)> orderItems = new()
+    {
+        (101, 201, 1),
+        (102, 202, 2),
+        (102, 205, 3),
+        (103, 204, 1),
+        (104, 203, 2),
+        (105, 201, 2),
+        (105, 202, 1),
+        (106, 204, 1),
+        (107, 205, 4)
+    };
+
+    private List<(int WarehouseId, string Location)> warehouses = new()
+    {
+        (301, "Sydney"),
+        (302, "Melbourne"),
+        (303, "Brisbane")
+    };
+
+    private List<(int ShipmentId, int WarehouseId, int ProductId, DateTime Date, int Quantity)> shipments = new()
+    {
+        (401, 301, 201, new DateTime(2025, 6, 20), 10),
+        (402, 302, 202, new DateTime(2025, 6, 21), 15),
+        (403, 303, 203, new DateTime(2025, 6, 22), 5),
+        (404, 301, 204, new DateTime(2025, 6, 23), 20),
+        (405, 302, 205, new DateTime(2025, 6, 24), 8)
+    };
+
+    private Queue<(DateTime Timestamp, string EventType, string Message)> systemLogs = new(new[]
+    {
+        (new DateTime(2025, 8, 10, 9, 0, 0), "INFO", "System started"),
+        (new DateTime(2025, 8, 10, 9, 5, 0), "WARN", "High memory usage"),
+        (new DateTime(2025, 8, 10, 9, 10, 0), "ERROR", "Database timeout"),
+        (new DateTime(2025, 8, 10, 9, 15, 0), "INFO", "Recovered from error"),
+        (new DateTime(2025, 8, 10, 9, 20, 0), "INFO", "New order received")
+    });
+
+    private HashSet<int> flaggedCustomerIds = new() { 2, 5 };
+
+    private Dictionary<int, List<int>> productAdjacency = new()
+    {
+        [201] = new List<int> { 202, 205 }, // Laptop → Phone, Monitor
+        [202] = new List<int> { 201 },      // Phone → Laptop
+        [203] = new List<int> { 204 },      // Desk → Chair
+        [204] = new List<int> { 203 },      // Chair → Desk
+        [205] = new List<int> { 201 }       // Monitor → Laptop
+    };
+
 
     public LinqChallenge_34()
     {
@@ -31,7 +100,34 @@ public class LinqChallenge_34
     // 🔹 Task 1: Highest Spenders
     // Group orders by customer → sum total spend → order descending
     // ⏱️ Expected: 10–12 min
-    private void HighestSpenders_T1() { }
+    // 10 - 10:08
+    private void HighestSpenders_T1()
+    {
+        var query = from order in orders
+                    group order by order.CustomerId into custGroup
+                    join cust in customers on custGroup.Key equals cust.CustomerId
+
+                    let sumSpent = custGroup.Sum(x => x.Amount)
+                    let orderCount = custGroup.Count()
+                    let avgSpentPerOrder = sumSpent / orderCount
+
+                    orderby sumSpent descending, orderCount descending, cust.Name
+
+                    select new
+                    {
+                        CustomerId = custGroup.Key,
+                        Customer = cust.Name,
+                        OrderCount = orderCount,
+                        SumSpent = Math.Round(sumSpent, 2),
+                        AvgSpentPerOrder = avgSpentPerOrder
+                    };
+
+        foreach (var item in query)
+        {
+            WriteLine($"ID {item.CustomerId}\tName: {item.Customer}\t\t{item.OrderCount} orders.");
+            WriteLine($"\t\tTotal Spent: ${item.SumSpent}\t\tAvg Spent Per Order: ${item.AvgSpentPerOrder}");
+        }
+    }
 
     // 🔹 Task 2: High Value Orders
     // Join orders + items + products → filter orders with total > $5000

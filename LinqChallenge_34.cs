@@ -85,8 +85,8 @@ public class LinqChallenge_34
 
     public LinqChallenge_34()
     {
-        HighestSpenders_T1();
-        //HighValueOrders_T2();
+        //HighestSpenders_T1();
+        HighValueOrders_T2();
         //ProductCategoryPerformance_T3();
         //WarehouseStockRotation_T4();
         //FraudFlaggedCustomerOrders_T5();
@@ -132,7 +132,44 @@ public class LinqChallenge_34
     // 🔹 Task 2: High Value Orders
     // Join orders + items + products → filter orders with total > $5000
     // ⏱️ Expected: 15–18 min
-    private void HighValueOrders_T2() { }
+    // 9:14 - 9:28
+    private void HighValueOrders_T2()
+    {
+        var query = from order in orders
+                    join cust in customers on order.CustomerId equals cust.CustomerId
+                    join orderItem in orderItems on order.OrderId equals orderItem.OrderId
+                    join product in products on orderItem.ProductId equals product.ProductId
+
+                    group new { cust, orderItem, product } by order into orderGroup
+
+                    let total = orderGroup.Sum(x => x.orderItem.Quantity * x.product.Price)
+
+                    //where total > 5000
+                    let products = orderGroup.Select(x => x.product).Distinct()
+                    let orderItemCount = orderGroup.Select(x => x.orderItem).Count()
+                    let productCount = products.Count()
+                    let customer = orderGroup.Select(x => x.cust).FirstOrDefault()
+                    let avgProductPrice = products.Average(x => x.Price)
+
+                    orderby total descending, orderItemCount descending, avgProductPrice descending, customer.Name
+                    select new
+                    {
+                        Order = orderGroup.Key,
+                        Customer = customer,
+                        OrderTotal = Math.Round(total, 2),
+                        OrderItemCount = orderItemCount,
+                        ProductCount = productCount,
+                        AvgProductPrice = Math.Round(avgProductPrice, 2),
+                    };
+
+        foreach (var item in query)
+        {
+            WriteLine($"Order {item.Order.OrderId}\t\t made on: {item.Order.OrderDate.ToShortDateString()}");
+            WriteLine($"\tBy Customer ID: {item.Customer.CustomerId}\t\tCustomer: {item.Customer.Name}");
+
+            WriteLine($"\t\tOrder Total: ${item.OrderTotal}\t\tAvg Product Price: ${item.AvgProductPrice}\t\tOrder Lines Count: {item.OrderItemCount}\t\tProduct Count: {item.ProductCount}");
+        }
+    }
 
     // 🔹 Task 3: Product Category Performance
     // Group by category → avg price, total quantity sold

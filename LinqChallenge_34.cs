@@ -87,8 +87,8 @@ public class LinqChallenge_34
     {
         //HighestSpenders_T1();
         //HighValueOrders_T2();
-        ProductCategoryPerformance_T3();
-        //WarehouseStockRotation_T4();
+        //ProductCategoryPerformance_T3();
+        WarehouseStockRotation_T4();
         //FraudFlaggedCustomerOrders_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
@@ -231,7 +231,54 @@ public class LinqChallenge_34
     // 🔹 Task 4: Warehouse Stock Rotation
     // Join shipments + products → group by warehouse → show rotation rate
     // ⏱️ Expected: 15–18 min
-    private void WarehouseStockRotation_T4() { }
+    // 9:23 - 9:42
+    private void WarehouseStockRotation_T4()
+    {
+        var list = (from shipment in shipments
+                    join prod in products on shipment.ProductId equals prod.ProductId
+                    join warehouse in warehouses on shipment.WarehouseId equals warehouse.WarehouseId
+                    group new { prod, shipment } by warehouse into warehouseGroup
+
+                    let shipmentCount = warehouseGroup.Count()
+                    let prodCount = warehouseGroup.Select(x => x.prod.ProductId).Distinct().Count()
+                    let shipmentsPerProduct = (decimal)shipmentCount / prodCount
+                    let totalQuantity = warehouseGroup.Sum(x => x.shipment.Quantity)
+                    let totalValue = warehouseGroup.Sum(x => x.shipment.Quantity * x.prod.Price)
+                    let rotationRate = (decimal)totalQuantity / prodCount
+                    let rotationCategory = rotationRate switch
+                    {
+                        >= 14 => "High",
+                        >= 7 => "Medium",
+                        _ => "Low"
+                    }
+
+                    orderby rotationRate descending, shipmentCount descending, prodCount descending, warehouseGroup.Key.Location
+
+                    select new
+                    {
+                        Warehouse = warehouseGroup.Key,
+                        ShipmentCount = shipmentCount,
+                        ProdCount = prodCount,
+                        ShipmentsPerProduct = Math.Round(shipmentsPerProduct, 2),
+                        TotalQuantity = totalQuantity,
+                        TotalValue = Math.Round(totalValue, 2),
+                        RotationRate = Math.Round(rotationRate, 2),
+                        RotationCategory = rotationCategory
+
+                    }).ToList();
+
+        foreach (var item in list)
+        {
+            WriteLine($"\nWarehouse: {item.Warehouse.WarehouseId}\t\t {item.Warehouse.Location}");
+            WriteLine($"\tRotation Category: {item.RotationCategory}");
+            WriteLine($"\tRotation Rate: {item.RotationRate}");
+            WriteLine($"\tShipments: {item.ShipmentCount}");
+            WriteLine($"\tProdCount: {item.ProdCount}");
+            WriteLine($"\tShipments Per Product: {item.ShipmentsPerProduct}");
+            WriteLine($"\tTotal Quantity: {item.TotalQuantity}");
+            WriteLine($"\tTotal Value: ${item.TotalValue}");
+        }
+    }
 
     // 🔹 Task 5: Fraud-Flagged Customer Orders
     // Inner join orders with flaggedCustomerIds → show suspicious activity

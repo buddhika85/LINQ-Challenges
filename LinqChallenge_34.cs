@@ -86,8 +86,8 @@ public class LinqChallenge_34
     public LinqChallenge_34()
     {
         //HighestSpenders_T1();
-        HighValueOrders_T2();
-        //ProductCategoryPerformance_T3();
+        //HighValueOrders_T2();
+        ProductCategoryPerformance_T3();
         //WarehouseStockRotation_T4();
         //FraudFlaggedCustomerOrders_T5();
         //PaginatedOrderHistory_T6();
@@ -174,7 +174,59 @@ public class LinqChallenge_34
     // 🔹 Task 3: Product Category Performance
     // Group by category → avg price, total quantity sold
     // ⏱️ Expected: 12–15 min
-    private void ProductCategoryPerformance_T3() { }
+    // 10:06 - 10:16
+    private void ProductCategoryPerformance_T3()
+    {
+        var list = (from prod in products
+                    join orderItem in orderItems on prod.ProductId equals orderItem.ProductId
+                    group new { prod, orderItem } by prod.Category into cateGroup
+
+                    let productsInCategory = cateGroup.Select(x => x.prod).Distinct()
+
+                    let avgPrice = productsInCategory.Average(x => x.Price)
+                    let prodCount = productsInCategory.Count()
+                    let totalEarning = cateGroup.Sum(x => x.prod.Price * x.orderItem.Quantity)
+                    let quantity = cateGroup.Sum(x => x.orderItem.Quantity)
+                    let orderCount = cateGroup.Select(x => x.orderItem.OrderId).Distinct().Count()
+                    let earningPerCategory = prodCount > 0 ? Math.Round(totalEarning / prodCount, 2) : 0.0m
+
+                    let topSellingProductOfCategory = (from item in cateGroup
+                                                       group item by item.prod into prodGroup
+                                                       let qtySold = prodGroup.Sum(x => x.orderItem.Quantity)
+                                                       orderby qtySold descending
+                                                       select new
+                                                       {
+                                                           Product = prodGroup.Key,
+                                                           QtySold = qtySold
+                                                       }).ToList().FirstOrDefault()
+
+
+                    orderby avgPrice descending, quantity descending, orderCount descending, cateGroup.Key
+
+                    select new
+                    {
+                        Category = cateGroup.Key,
+                        TopSellingProductOfCategory = topSellingProductOfCategory,
+                        ProductCount = prodCount,
+                        TotalEarning = Math.Round(totalEarning, 2),
+                        AvgPrice = Math.Round(avgPrice, 2),
+                        Quantity = quantity,
+                        OrderCount = orderCount,
+                        EarningPerCategory = earningPerCategory,
+                    }).ToList();
+        foreach (var item in list)
+        {
+            WriteLine($"\nCategory: {item.Category} Details");
+            WriteLine($"\tProduct count: {item.ProductCount}");
+            WriteLine($"\tTotal Earning: ${item.TotalEarning}");
+            WriteLine($"\tAverage Price: ${item.AvgPrice}");
+            WriteLine($"\tEarning per category: ${item.EarningPerCategory}");
+            WriteLine($"\tQuantity Sold: {item.Quantity}");
+            WriteLine($"\tOrder Count: {item.OrderCount}");
+            WriteLine($"\tTop selling Product ID: {item.TopSellingProductOfCategory.Product.ProductId}\tName: {item.TopSellingProductOfCategory.Product.Name}");
+            WriteLine($"\tTop selling Product Sold Quantity: {item.TopSellingProductOfCategory.QtySold}");
+        }
+    }
 
     // 🔹 Task 4: Warehouse Stock Rotation
     // Join shipments + products → group by warehouse → show rotation rate

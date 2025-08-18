@@ -89,8 +89,8 @@ public class LinqChallenge_34
         //HighValueOrders_T2();
         //ProductCategoryPerformance_T3();
         //WarehouseStockRotation_T4();
-        FraudFlaggedCustomerOrders_T5();
-        //PaginatedOrderHistory_T6();
+        //FraudFlaggedCustomerOrders_T5();
+        PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
         //GraphBasedProductRecommendations_T9();
@@ -330,7 +330,50 @@ public class LinqChallenge_34
     // 🔹 Task 6: Paginated Order History
     // Show orders per customer → paginate 5 per page
     // ⏱️ Expected: 12–15 min
-    private void PaginatedOrderHistory_T6() { }
+    // 9:08 - 9:22
+    private void PaginatedOrderHistory_T6()
+    {
+        var ordersByCustomer = (from cust in customers
+                                join order in orders on cust.CustomerId equals order.CustomerId
+                                group new { cust, order } by order.CustomerId into custGroup
+
+                                let orders = custGroup.Select(x => x.order)
+                                let customer = custGroup.Select(x => x.cust).First()
+                                let orderCount = orders.Count()
+                                let minOrderDate = orders.Min(x => x.OrderDate)
+                                let maxOrderDate = orders.Max(x => x.OrderDate)
+                                let minAmount = orders.Min(x => x.Amount)
+                                let maxAmount = orders.Max(x => x.Amount)
+                                let sumOrderAmount = orders.Sum(x => x.Amount)
+
+                                orderby orderCount descending, sumOrderAmount descending, maxOrderDate descending, customer.Name
+
+                                select new
+                                {
+                                    Customer = customer,
+                                    OrderCount = orderCount,
+                                    MinOrderDate = minOrderDate,
+                                    MaxOrderDate = maxOrderDate,
+                                    MinAmount = Math.Round(minAmount, 2),
+                                    MaxAmount = Math.Round(maxAmount, 2),
+                                    SumOrderAmount = Math.Round(sumOrderAmount, 2)
+                                }).ToList();
+        var itemsPerPage = 5;
+        for (var pageNum = 0; ;)
+        {
+            var pagedItems = ordersByCustomer.Skip(pageNum * itemsPerPage).Take(itemsPerPage);
+            if (!pagedItems.Any())
+                break;
+            WriteLine($"\nPage [{++pageNum}]");
+            foreach (var item in pagedItems)
+            {
+                WriteLine($"Customer {item.Customer.CustomerId}\t {item.Customer.Name}\t{item.Customer.Region}");
+                WriteLine($"\tOrder Count :{item.OrderCount}");
+                WriteLine($"\tMin Order Date :{item.MinOrderDate.ToShortDateString()}\tMax Order Date :{item.MaxOrderDate.ToShortDateString()}");
+                WriteLine($"\tMin Amount :${item.MinAmount}\tMax Amount :${item.MaxAmount}\tSum Amount :${item.SumOrderAmount}");
+            }
+        }
+    }
 
     // 🔹 Task 7: Deferred Execution Trap
     // Show how modifying source after query affects results

@@ -88,8 +88,8 @@ public class LinqChallenge_34
         //HighestSpenders_T1();
         //HighValueOrders_T2();
         //ProductCategoryPerformance_T3();
-        WarehouseStockRotation_T4();
-        //FraudFlaggedCustomerOrders_T5();
+        //WarehouseStockRotation_T4();
+        FraudFlaggedCustomerOrders_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
@@ -283,7 +283,49 @@ public class LinqChallenge_34
     // 🔹 Task 5: Fraud-Flagged Customer Orders
     // Inner join orders with flaggedCustomerIds → show suspicious activity
     // ⏱️ Expected: 10–12 min
-    private void FraudFlaggedCustomerOrders_T5() { }
+    // 10:10 - 10:27
+    private void FraudFlaggedCustomerOrders_T5()
+    {
+        var list = (from flagged in flaggedCustomerIds
+                    join cust in customers on flagged equals cust.CustomerId
+                    join order in orders on flagged equals order.CustomerId
+
+                    group new { cust, order } by flagged into flaggedGroup
+
+                    let customer = flaggedGroup.Select(x => x.cust).First()
+                    let orderCout = flaggedGroup.Count()
+                    let minOrderDate = flaggedGroup.Min(x => x.order.OrderDate)
+                    let maxOrderDate = flaggedGroup.Max(x => x.order.OrderDate)
+                    let minAmount = flaggedGroup.Min(x => x.order.Amount)
+                    let maxAmount = flaggedGroup.Max(x => x.order.Amount)
+                    let avgAmount = flaggedGroup.Average(x => x.order.Amount)
+
+                    orderby orderCout descending, maxOrderDate descending, maxAmount descending, customer.Name
+
+                    select new
+                    {
+                        FlaggedCustomerId = flaggedGroup.Key,
+                        Customer = customer,
+                        OrderCount = orderCout,
+                        MinOrderDate = minOrderDate,
+                        MaxOrderDate = maxOrderDate,
+                        MinAmount = Math.Round(minAmount, 2),
+                        MaxAmount = Math.Round(maxAmount, 2),
+                        AvgAmount = Math.Round(avgAmount, 2),
+
+                    }).ToList();
+
+        foreach (var item in list)
+        {
+            WriteLine($"{item.FlaggedCustomerId}\t\tName: {item.Customer.Name}\t\tRegion: {item.Customer.Region}");
+            WriteLine($"\t\tOrder count: {item.OrderCount}");
+            WriteLine($"\t\tMin order date: {item.MinOrderDate.ToShortDateString()}");
+            WriteLine($"\t\tMax order date: {item.MinOrderDate.ToShortDateString()}");
+            WriteLine($"\t\tAvg order amount: ${item.AvgAmount}");
+            WriteLine($"\t\tMin order amount: ${item.MinAmount}");
+            WriteLine($"\t\tMax order amount: ${item.MaxAmount}");
+        }
+    }
 
     // 🔹 Task 6: Paginated Order History
     // Show orders per customer → paginate 5 per page

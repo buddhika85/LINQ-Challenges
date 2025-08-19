@@ -90,8 +90,8 @@ public class LinqChallenge_34
         //ProductCategoryPerformance_T3();
         //WarehouseStockRotation_T4();
         //FraudFlaggedCustomerOrders_T5();
-        PaginatedOrderHistory_T6();
-        //DeferredExecutionTrap_T7();
+        //PaginatedOrderHistory_T6();
+        DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
         //GraphBasedProductRecommendations_T9();
         //LogStreamAnalysis_T10();
@@ -382,7 +382,36 @@ public class LinqChallenge_34
     // 🔹 Task 7: Deferred Execution Trap
     // Show how modifying source after query affects results
     // ⏱️ Expected: 8–10 min
-    private void DeferredExecutionTrap_T7() { }
+    // 8:43 - 8:49
+    private void DeferredExecutionTrap_T7()
+    {
+        //var firstCustomerQuery = (from cust in customers
+        //                          where cust.CustomerId == 1
+        //                          select cust);
+        //var custOne = customers.First(x => x.CustomerId == 1);
+        //custOne.Name = "Updated";
+
+        //var customer = firstCustomerQuery.First();
+        //WriteLine(object.ReferenceEquals(custOne, customer));
+        //WriteLine($"{customer.CustomerId}\t\t{customer.Name}");
+
+        var nums = new List<int> { 1, 2, 3, 4 };
+        IEnumerable<int> evenNums = from num in nums
+                                    where num % 2 == 0
+                                    select num;
+        WriteLine("Even numbers exepcted are 2 and 4, but linq query is still not executed\n");
+
+        nums.Remove(2);
+        nums.Add(6);
+        WriteLine("source is modified to remove 2 and have 6, now deferred executing linq query\nand results are\n");
+
+        evenNums = evenNums.ToList();               // execute the linq query
+
+        foreach (var item in evenNums)
+        {
+            WriteLine(item);
+        }
+    }
 
     // 🔹 Task 8: Dynamic Customer Search
     // Build query dynamically using Expression<Func<T, bool>>

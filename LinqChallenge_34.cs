@@ -1,4 +1,6 @@
-﻿using static System.Console;
+﻿using System.Linq;
+using System.Linq.Expressions;
+using static System.Console;
 
 namespace LINQ_Challeges;
 
@@ -91,8 +93,8 @@ public class LinqChallenge_34
         //WarehouseStockRotation_T4();
         //FraudFlaggedCustomerOrders_T5();
         //PaginatedOrderHistory_T6();
-        DeferredExecutionTrap_T7();
-        //DynamicCustomerSearch_T8();
+        //DeferredExecutionTrap_T7();
+        DynamicCustomerSearch_T8();
         //GraphBasedProductRecommendations_T9();
         //LogStreamAnalysis_T10();
     }
@@ -416,12 +418,73 @@ public class LinqChallenge_34
     // 🔹 Task 8: Dynamic Customer Search
     // Build query dynamically using Expression<Func<T, bool>>
     // ⏱️ Expected: 15–18 min
-    private void DynamicCustomerSearch_T8() { }
+    // 7:39 - 8:08
+
+    private class Customer
+    {
+        public int CustomerId { get; set; }
+        public string? Name { get; set; }
+        public string? Region { get; set; }
+
+        public Customer(int id, string name, string region)
+        {
+            CustomerId = id;
+            Name = name;
+            Region = region;
+        }
+
+        public override string ToString()
+        {
+            return $"{CustomerId} - {Name} - {Region}";
+        }
+    }
+
+    private List<Customer> customerObjs = new()
+    {
+        new Customer(1, "Alice", "NSW"),
+        new Customer(2, "Bob", "VIC"),
+        new Customer(3, "Charlie", "QLD"),
+        new Customer(4, "Diana", "NSW"),
+        new Customer(5, "Ethan", "WA")
+    };
+    private void DynamicCustomerSearch_T8()
+    {
+        Expression<Func<Customer, bool>> customerFilter1 =
+            x => x.Region != null && x.Region.Equals("WA", StringComparison.OrdinalIgnoreCase);
+
+        Expression<Func<Customer, bool>> customerFilter2 =
+            x => x.Name != null && (x.Name.StartsWith('A') || x.Name.StartsWith('E'));
+
+        var dynamicQueryList = new List<(string, Expression<Func<Customer, bool>>)>
+        {
+           ("Customers in WA", customerFilter1),
+           ("Customers with names starting with A or E", customerFilter2)
+        };
+
+        foreach (var query in dynamicQueryList)
+        {
+            var customers = SearchByFilter(query.Item2);
+            WriteLine($"\n{query.Item1} - Found {customers.Count()} customers");
+            foreach (var customer in customers)
+            {
+                WriteLine($"\t{customer}");
+            }
+        }
+    }
+    private IEnumerable<Customer> SearchByFilter(Expression<Func<Customer, bool>> filter)
+    {
+        var compiledFilter = filter.Compile(); // Converts Expression to Func
+        return customerObjs.Where(compiledFilter);
+    }
+
+
+
 
     // 🔹 Task 9: Graph-Based Product Recommendations
     // Traverse productAdjacency graph → show related products
     // ⏱️ Expected: 18–22 min
-    private void GraphBasedProductRecommendations_T9() { }
+    private void GraphBasedProductRecommendations_T9()
+    { }
 
     // 🔹 Task 10: Log Stream Analysis
     // Use Queue to analyze recent system events → group by type

@@ -455,10 +455,14 @@ public class LinqChallenge_34
         Expression<Func<Customer, bool>> customerFilter2 =
             x => x.Name != null && (x.Name.StartsWith('A') || x.Name.StartsWith('E'));
 
+        Expression<Func<Customer, bool>> combinedFilter =
+            x => (customerFilter1.Compile())(x) && (customerFilter2.Compile())(x);
+
         var dynamicQueryList = new List<(string, Expression<Func<Customer, bool>>)>
         {
            ("Customers in WA", customerFilter1),
-           ("Customers with names starting with A or E", customerFilter2)
+           ("Customers with names starting with A or E", customerFilter2),
+           ("Customers in WA and with names starting with A or E", combinedFilter)
         };
 
         foreach (var query in dynamicQueryList)

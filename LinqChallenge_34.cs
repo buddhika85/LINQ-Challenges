@@ -102,12 +102,23 @@ public class LinqChallenge_34
     // Traverse productAdjacency graph → show related products
     // This kind of output is perfect for powering a “Customers also viewed” or “You might also like” feature.
     // ⏱️ Expected: 18–22 min
-    // 10:22 - 
+    // 10:22 - 11:04
     private void GraphBasedProductRecommendations_T9()
     {
-
-
-
+        var productsDictionary = products.ToDictionary(x => x.ProductId, x => x.Name);
+        foreach (var item in productAdjacency)
+        {
+            var productFound = productsDictionary.TryGetValue(item.Key, out string? prodName);
+            if (productFound && prodName != null)
+            {
+                WriteLine($"\n{prodName}");
+                foreach (var linkedProductId in item.Value)
+                {
+                    if (productsDictionary.TryGetValue(linkedProductId, out string? linkedProdName) && linkedProdName != null)
+                        WriteLine($"\tIs frequently baught with : {linkedProdName}");
+                }
+            }
+        }
     }
 
     private void DisplayOrderLinesAndProducts()

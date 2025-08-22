@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using static System.Console;
 
 namespace LINQ_Challeges;
@@ -94,10 +93,53 @@ public class LinqChallenge_34
         //FraudFlaggedCustomerOrders_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
-        DynamicCustomerSearch_T8();
-        //GraphBasedProductRecommendations_T9();
+        //DynamicCustomerSearch_T8();
+        GraphBasedProductRecommendations_T9();
         //LogStreamAnalysis_T10();
     }
+
+    // 🔹 Task 9: Graph-Based Product Recommendations
+    // Traverse productAdjacency graph → show related products
+    // This kind of output is perfect for powering a “Customers also viewed” or “You might also like” feature.
+    // ⏱️ Expected: 18–22 min
+    // 10:22 - 
+    private void GraphBasedProductRecommendations_T9()
+    {
+
+
+
+    }
+
+    private void DisplayOrderLinesAndProducts()
+    {
+        // orderToOrderLineAndProduct
+        var orderLinesWithProduct = (from orderLine in orderItems
+                                     join order in orders on orderLine.OrderId equals order.OrderId
+                                     join product in products on orderLine.ProductId equals product.ProductId
+
+                                     group new { orderLine, product } by order.OrderId into orderGroup
+
+                                     let orderLinesWithProducts = orderGroup
+                                     let orderId = orderGroup.Key
+
+                                     where orderGroup.Count() > 1
+
+                                     select new
+                                     {
+                                         OrderId = orderId,
+                                         OrderLinesWithProducts = orderLinesWithProducts
+                                     }).ToList();
+
+        foreach (var item in orderLinesWithProduct)
+        {
+            WriteLine($"\nOrder - {item.OrderId}");
+            foreach (var orderLine in item.OrderLinesWithProducts)
+            {
+                WriteLine($"\t{orderLine.product.Name}");
+            }
+        }
+    }
+
 
     // 🔹 Task 1: Highest Spenders
     // Group orders by customer → sum total spend → order descending
@@ -480,15 +522,6 @@ public class LinqChallenge_34
         var compiledFilter = filter.Compile(); // Converts Expression to Func
         return customerObjs.Where(compiledFilter);
     }
-
-
-
-
-    // 🔹 Task 9: Graph-Based Product Recommendations
-    // Traverse productAdjacency graph → show related products
-    // ⏱️ Expected: 18–22 min
-    private void GraphBasedProductRecommendations_T9()
-    { }
 
     // 🔹 Task 10: Log Stream Analysis
     // Use Queue to analyze recent system events → group by type

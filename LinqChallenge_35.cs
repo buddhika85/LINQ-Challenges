@@ -5,15 +5,86 @@ namespace LINQ_Challenges;
 public class LinqChallengeArchitectSet
 {
     // 🔹 Core Data Models
-    private List<(int CustomerId, string Name, string Region, bool IsPremium)> customers = new();
-    private List<(int OrderId, int CustomerId, DateTime OrderDate, decimal Amount)> orders = new();
-    private List<(int ProductId, string Name, string Category, decimal Price)> products = new();
-    private List<(int OrderId, int ProductId, int Quantity)> orderItems = new();
-    private List<(int WarehouseId, string Location)> warehouses = new();
-    private List<(int ShipmentId, int WarehouseId, int ProductId, DateTime Date, int Quantity)> shipments = new();
-    private Queue<(DateTime Timestamp, string EventType, string Message)> systemLogs = new();
-    private HashSet<int> flaggedCustomerIds = new();
-    private Dictionary<int, List<int>> productAdjacency = new();
+    private List<(int CustomerId, string Name, string Region, bool IsPremium)> customers = new() {
+        (1, "Alice", "NSW", true),
+        (2, "Bob", "VIC", false),
+        (3, "Charlie", "QLD", true),
+        (4, "Diana", "NSW", false),
+        (5, "Ethan", "WA", true)
+    };
+    private List<(int OrderId, int CustomerId, DateTime OrderDate, decimal Amount)> orders = new(){
+        (101, 1, DateTime.Today.AddDays(-10), 1200),
+        (102, 1, DateTime.Today.AddDays(-5), 3800),
+        (103, 2, DateTime.Today.AddDays(-8), 600),
+        (104, 3, DateTime.Today.AddDays(-3), 5200),
+        (105, 4, DateTime.Today.AddDays(-1), 250),
+        (106, 5, DateTime.Today.AddDays(-2), 7000)
+    };
+    private List<(int ProductId, string Name, string Category, decimal Price)> products = new()
+    {
+        (201, "Laptop", "Electronics", 1500),
+        (202, "Phone", "Electronics", 800),
+        (203, "Desk", "Furniture", 300),
+        (204, "Chair", "Furniture", 150),
+        (205, "Monitor", "Electronics", 400)
+    };
+    private List<(int OrderId, int ProductId, int Quantity)> orderItems = new()
+    {
+        (101, 201, 1),
+        (101, 202, 2),
+        (102, 205, 3),
+        (103, 203, 1),
+        (104, 201, 2),
+        (104, 202, 1),
+        (105, 204, 1),
+        (106, 201, 1),
+        (106, 205, 2)
+    };
+    private List<(int WarehouseId, string Location)> warehouses = new()
+    {
+        (1, "Sydney"),
+        (2, "Melbourne")
+    };
+    private List<(int ShipmentId, int WarehouseId, int ProductId, DateTime Date, int Quantity)> shipments = new()
+    {
+        (301, 1, 201, DateTime.Today.AddDays(-7), 10),
+        (302, 1, 202, DateTime.Today.AddDays(-6), 15),
+        (303, 2, 203, DateTime.Today.AddDays(-5), 5),
+        (304, 2, 204, DateTime.Today.AddDays(-4), 8),
+        (305, 1, 205, DateTime.Today.AddDays(-3), 12)
+    };
+    private Queue<(DateTime Timestamp, string EventType, string Message)> systemLogs = new(new[]
+    {
+        (DateTime.Now.AddMinutes(-30), "INFO", "System started"),
+        (DateTime.Now.AddMinutes(-25), "WARN", "High memory usage"),
+        (DateTime.Now.AddMinutes(-20), "ERROR", "Unhandled exception"),
+        (DateTime.Now.AddMinutes(-15), "INFO", "Heartbeat OK"),
+        (DateTime.Now.AddMinutes(-10), "ERROR", "Database timeout"),
+        (DateTime.Now.AddMinutes(-5), "INFO", "User login success")
+    });
+    private HashSet<int> flaggedCustomerIds = new() { 1, 3, 5 };
+    private Dictionary<int, List<int>> productAdjacency = new()
+    {
+        [201] = new List<int> { 202, 205 }, // Laptop → Phone, Monitor
+        [202] = new List<int> { 201 },      // Phone → Laptop
+        [203] = new List<int> { 204 },      // Desk → Chair
+        [204] = new List<int> { 203 },      // Chair → Desk
+        [205] = new List<int> { 201 }       // Monitor → Laptop
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public LinqChallengeArchitectSet()
     {
@@ -39,7 +110,50 @@ public class LinqChallengeArchitectSet
     // Output: CustomerId, Name, OrderCount, TotalSpent, AvgSpentPerOrder
     // Pagination: ❌ Not needed
     // Expected Time: 10–12 min
-    private void HighestSpenders_T1() { }
+    // 9:32 - 9:46
+    private void HighestSpenders_T1()
+    {
+        var highSpenders = (from order in orders
+                            join cust in customers on order.CustomerId equals cust.CustomerId
+                            group new { order, cust } by order.CustomerId into custGroup
+
+
+                            let customer = custGroup.FirstOrDefault()?.cust
+                            let orders = custGroup.Select(x => x.order)
+                            let orderCount = custGroup.Count()
+                            let totalSpent = orders.Sum(x => x.Amount)
+                            let minOrder = orders.Min(x => x.Amount)
+                            let maxOrder = orders.Max(x => x.Amount)
+                            let avgSpentPerOrder = orders.Average(x => x.Amount)
+
+                            orderby totalSpent descending, customer?.Name
+
+                            select new
+                            {
+                                CustomerId = customer?.CustomerId,
+                                CustomerName = customer?.Name,
+                                IsPremium = customer?.IsPremium,
+                                OrderCount = orderCount,
+                                TotalSpent = Math.Round(totalSpent, 2),
+                                AvgSpentPerOrder = Math.Round(avgSpentPerOrder, 2),
+                                MinOrder = Math.Round(minOrder, 2),
+                                MaxOrder = Math.Round(maxOrder, 2)
+                            }).ToList();
+
+        foreach (var item in highSpenders)
+        {
+            var isPremium = "No";
+            if (item.IsPremium != null && item.IsPremium.Value)
+                isPremium = "Yes";
+
+            WriteLine($"\nID: {item.CustomerId}\t\tCustomer: {item.CustomerName}\t\tPremium customer: {isPremium}");
+            WriteLine($"\tOrder count: {item.OrderCount}");
+            WriteLine($"\tTotal Spent: ${item.TotalSpent}");
+            WriteLine($"\tAvg Per Order: ${item.AvgSpentPerOrder}");
+            WriteLine($"\tMin Order: ${item.MinOrder}");
+            WriteLine($"\tMax Order: ${item.MaxOrder}");
+        }
+    }
 
     // 🔹 Task 2: Orders Above $5000
     // Brief: Join orders + items + products → filter orders with total > $5000

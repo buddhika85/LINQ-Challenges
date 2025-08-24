@@ -123,6 +123,13 @@ public class LinqChallenge_34
                 WriteLine($"\t\t{evt.Timestamp} - {evt.Message}");
             }
         }
+
+        //Queue<(DateTime Timestamp, string EventType, string Message)> systemLogsQueue = new();
+        //systemLogs.ToList().ForEach(x =>
+        //{
+        //    systemLogsQueue.Enqueue(x);
+        //});
+
     }
 
     // 🔹 Task 9: Graph-Based Product Recommendations

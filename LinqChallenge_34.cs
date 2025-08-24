@@ -94,8 +94,35 @@ public class LinqChallenge_34
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
-        GraphBasedProductRecommendations_T9();
-        //LogStreamAnalysis_T10();
+        //GraphBasedProductRecommendations_T9();
+        LogStreamAnalysis_T10();
+    }
+
+
+    // 🔹 Task 10: Log Stream Analysis
+    // Use Queue to analyze recent system events → group by type
+    // ⏱️ Expected: 10–12 min
+    // 9:09 - 9:16
+    private void LogStreamAnalysis_T10()
+    {
+        var eventsByType = (from log in systemLogs
+                            group log by log.EventType into logGroup
+                            let eventCount = logGroup.Count()
+                            orderby eventCount descending, logGroup.Key
+                            select new
+                            {
+                                EventType = logGroup.Key,
+                                Events = logGroup,
+                                EventCount = eventCount,
+                            }).ToList();
+        foreach (var item in eventsByType)
+        {
+            WriteLine($"\n{item.EventType} has {item.EventCount}");
+            foreach (var evt in item.Events)
+            {
+                WriteLine($"\t\t{evt.Timestamp} - {evt.Message}");
+            }
+        }
     }
 
     // 🔹 Task 9: Graph-Based Product Recommendations
@@ -534,9 +561,5 @@ public class LinqChallenge_34
         return customerObjs.Where(compiledFilter);
     }
 
-    // 🔹 Task 10: Log Stream Analysis
-    // Use Queue to analyze recent system events → group by type
-    // ⏱️ Expected: 10–12 min
-    private void LogStreamAnalysis_T10() { }
 
 }

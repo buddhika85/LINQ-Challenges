@@ -115,10 +115,10 @@ public class LinqChallengeArchitectSet
     {
         var highSpenders = (from order in orders
                             join cust in customers on order.CustomerId equals cust.CustomerId
-                            group new { order, cust } by order.CustomerId into custGroup
+                            group new { order } by cust into custGroup
 
 
-                            let customer = custGroup.FirstOrDefault()?.cust
+                            let customer = custGroup.Key
                             let orders = custGroup.Select(x => x.order)
                             let orderCount = custGroup.Count()
                             let totalSpent = orders.Sum(x => x.Amount)
@@ -126,13 +126,14 @@ public class LinqChallengeArchitectSet
                             let maxOrder = orders.Max(x => x.Amount)
                             let avgSpentPerOrder = orders.Average(x => x.Amount)
 
-                            orderby totalSpent descending, customer?.Name
+                            orderby totalSpent descending, customer.Name
 
                             select new
                             {
-                                CustomerId = customer?.CustomerId,
-                                CustomerName = customer?.Name,
-                                IsPremium = customer?.IsPremium,
+                                CustomerId = customer.CustomerId,
+                                CustomerName = customer.Name,
+                                IsPremium = customer.IsPremium,
+                                IsPremiumStr = customer.IsPremium ? "Yes" : "No",
                                 OrderCount = orderCount,
                                 TotalSpent = Math.Round(totalSpent, 2),
                                 AvgSpentPerOrder = Math.Round(avgSpentPerOrder, 2),
@@ -142,11 +143,7 @@ public class LinqChallengeArchitectSet
 
         foreach (var item in highSpenders)
         {
-            var isPremium = "No";
-            if (item.IsPremium != null && item.IsPremium.Value)
-                isPremium = "Yes";
-
-            WriteLine($"\nID: {item.CustomerId}\t\tCustomer: {item.CustomerName}\t\tPremium customer: {isPremium}");
+            WriteLine($"\nID: {item.CustomerId}\t\tCustomer: {item.CustomerName}\t\tPremium customer: {item.IsPremiumStr}");
             WriteLine($"\tOrder count: {item.OrderCount}");
             WriteLine($"\tTotal Spent: ${item.TotalSpent}");
             WriteLine($"\tAvg Per Order: ${item.AvgSpentPerOrder}");

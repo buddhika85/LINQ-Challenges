@@ -152,20 +152,21 @@ public class LinqChallengeArchitectSet
                                 join orderItem in orderItems on order.OrderId equals orderItem.OrderId
                                 join prod in products on orderItem.ProductId equals prod.ProductId
 
-                                group new { cust, orderItem, prod } by order into orderGroup
+                                group new { orderItem, prod } by new { order, cust } into orderGroup
 
-                                let customer = orderGroup.Select(x => x.cust).FirstOrDefault()
+                                let customer = orderGroup.Key.cust
+                                let order = orderGroup.Key.order
                                 let totalValue = orderGroup.Sum(x => x.prod.Price * x.orderItem.Quantity)
                                 let itemCount = orderGroup.Select(x => x.orderItem).Count()
                                 let productCount = orderGroup.Select(x => x.orderItem.ProductId).Distinct().Count()
 
-                                //where totalValue > 5000
+                                // totalValue > 5000
 
                                 orderby totalValue descending, itemCount descending, productCount descending, customer.Name
 
                                 select new
                                 {
-                                    Order = orderGroup.Key,
+                                    Order = order,
                                     Customer = customer,
                                     ItemCount = itemCount,
                                     ProductCount = productCount,

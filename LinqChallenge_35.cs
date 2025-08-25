@@ -1,4 +1,5 @@
-﻿using static System.Console;
+﻿using LINQ_Challeges.Models;
+using static System.Console;
 
 namespace LINQ_Challenges;
 
@@ -72,24 +73,10 @@ public class LinqChallengeArchitectSet
         [205] = new List<int> { 201 }       // Monitor → Laptop
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public LinqChallengeArchitectSet()
     {
-        HighestSpenders_T1();
-        //HighValueOrders_T2();
+        //HighestSpenders_T1();
+        HighValueOrders_T2();
         //CategoryPerformance_T3();
         //WarehouseRotation_T4();
         //FraudDetection_T5();
@@ -157,7 +144,41 @@ public class LinqChallengeArchitectSet
     // Output: OrderId, CustomerName, TotalOrderValue, ItemCount, ProductCount
     // Pagination: ❌ Not needed
     // Expected Time: 15–18 min
-    private void HighValueOrders_T2() { }
+    // 9:28 - 9:46
+    private void HighValueOrders_T2()
+    {
+        var orderDetailsList = (from order in orders
+                                join cust in customers on order.CustomerId equals cust.CustomerId
+                                join orderItem in orderItems on order.OrderId equals orderItem.OrderId
+                                join prod in products on orderItem.ProductId equals prod.ProductId
+
+                                group new { cust, orderItem, prod } by order into orderGroup
+
+                                let customer = orderGroup.Select(x => x.cust).FirstOrDefault()
+                                let totalValue = orderGroup.Sum(x => x.prod.Price * x.orderItem.Quantity)
+                                let itemCount = orderGroup.Select(x => x.orderItem).Count()
+                                let productCount = orderGroup.Select(x => x.orderItem.ProductId).Distinct().Count()
+
+                                //where totalValue > 5000
+
+                                orderby totalValue descending, itemCount descending, productCount descending, customer.Name
+
+                                select new
+                                {
+                                    Order = orderGroup.Key,
+                                    Customer = customer,
+                                    ItemCount = itemCount,
+                                    ProductCount = productCount,
+                                    TotalValue = Math.Round(totalValue, 2),
+                                }).ToList();
+
+        foreach (var order in orderDetailsList)
+        {
+            WriteLine($"\nOrder ID: {order.Order.OrderId}\t\tOrder Date: {order.Order.OrderDate.ToShortTimeString()}\t\tTotal Value: ${order.TotalValue}");
+            WriteLine($"\tCustomer ID: {order.Order.CustomerId}\t\tName: {order.Customer.Name}");
+            WriteLine($"\tItem count: {order.ItemCount}\t\tProduct count: {order.ProductCount}");
+        }
+    }
 
     // 🔹 Task 3: Category Performance
     // Brief: Group by category → avg price, total quantity sold

@@ -76,8 +76,8 @@ public class LinqChallengeArchitectSet
     {
         //HighestSpenders_T1();
         //HighValueOrders_T2();
-        CategoryPerformance_T3();
-        //WarehouseRotation_T4();
+        //CategoryPerformance_T3();
+        WarehouseRotation_T4();
         //FraudDetection_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
@@ -237,7 +237,45 @@ public class LinqChallengeArchitectSet
     // Output: WarehouseId, Location, TotalQuantity, DistinctProducts, RotationRate
     // Pagination: ❌ Not needed
     // Expected Time: 15–18 min
-    private void WarehouseRotation_T4() { }
+    // 8:44 - 8:58
+    private void WarehouseRotation_T4()
+    {
+        var list = (from shipment in shipments
+                    join warehouse in warehouses on shipment.WarehouseId equals warehouse.WarehouseId
+
+                    group shipment by warehouse into warehouseGroup
+
+                    let warehouseId = warehouseGroup.Key.WarehouseId
+                    let location = warehouseGroup.Key.Location
+                    let totalQty = warehouseGroup.Sum(x => x.Quantity)
+                    let distinctProductsCount = warehouseGroup.Select(x => x.ProductId).Distinct().Count()
+                    let rotationRate = (float)totalQty / distinctProductsCount
+
+                    let rotationRateTier = rotationRate switch
+                    {
+                        > 10 => "High",
+                        >= 5 => "Medium",
+                        _ => "Low"
+                    }
+
+                    orderby rotationRate descending, distinctProductsCount descending, totalQty descending, location
+
+                    select new
+                    {
+                        WarehouseId = warehouseId,
+                        Location = location,
+                        TotalQty = totalQty,
+                        DistinctProductsCount = distinctProductsCount,
+                        RotationRate = Math.Round(rotationRate, 2),
+                        RotationRateTier = rotationRateTier
+                    }).ToList();
+
+        foreach (var item in list)
+        {
+            WriteLine($"\nWarehouse {item.WarehouseId}\t\tat: {item.Location}\t\tRotation Tier: {item.RotationRateTier}");
+            WriteLine($"\tTotal Qty: {item.TotalQty}\t\tDistinct Products Count: {item.DistinctProductsCount}\t\tRotation Rate: {item.RotationRate}");
+        }
+    }
 
     // 🔹 Task 5: Fraud Detection
     // Brief: Inner join orders with flaggedCustomerIds → show suspicious activity

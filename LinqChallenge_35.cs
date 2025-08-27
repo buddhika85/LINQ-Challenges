@@ -200,13 +200,23 @@ public class LinqChallengeArchitectSet
                      let orderCount = categoryGroup.Select(x => x.orderItem.OrderId).Distinct().Count()
                      let avgPerOrder = totalEarning / orderCount
                      let avgPricePerItem = totalEarning / totalQtySold
+                     let productsCount = categoryGroup.Select(x => x.prod.ProductId).Distinct().Count()
+
+                     let tier = totalEarning switch
+                     {
+                         > 8000 => "High",
+                         >= 4000 => "Medium",
+                         _ => "Low"
+                     }
 
                      orderby totalEarning descending, orderCount descending, totalQtySold descending, category
 
                      select new
                      {
                          Category = category,
+                         Tier = tier,
                          OrderCount = orderCount,
+                         ProductCount = productsCount,
                          TotalQtySold = totalQtySold,
                          AvgPrice = Math.Round(avgPrice, 2),
                          TotalEarning = Math.Round(totalEarning, 2),
@@ -216,8 +226,8 @@ public class LinqChallengeArchitectSet
 
         foreach (var item in query)
         {
-            WriteLine($"\nCategory: {item.Category}");
-            WriteLine($"\tOrders: {item.OrderCount}\t\tTotal Quantity Sold: {item.TotalQtySold}");
+            WriteLine($"\nCategory: {item.Category}\t\tTier: {item.Tier}");
+            WriteLine($"\tOrders: {item.OrderCount}\t\tTotal Quantity Sold: {item.TotalQtySold}\t\tProduct cound: {item.ProductCount}");
             WriteLine($"\tTotal Earning: ${item.TotalEarning}\t\tAvg Price: ${item.AvgPrice}\t\tAvg Per Order: ${item.AvgPerOrder}\t\tAvg Per Item: ${item.AvgPricePerItem}");
         }
     }

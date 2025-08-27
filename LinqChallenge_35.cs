@@ -246,16 +246,17 @@ public class LinqChallengeArchitectSet
                     group shipment by warehouse into warehouseGroup
 
                     let warehouseId = warehouseGroup.Key.WarehouseId
+                    let shipmentCount = warehouseGroup.Count()
                     let location = warehouseGroup.Key.Location
                     let totalQty = warehouseGroup.Sum(x => x.Quantity)
                     let distinctProductsCount = warehouseGroup.Select(x => x.ProductId).Distinct().Count()
-                    let rotationRate = (float)totalQty / distinctProductsCount
+                    let rotationRate = distinctProductsCount > 0 ? (float)totalQty / distinctProductsCount : 0.0
 
                     let rotationRateTier = rotationRate switch
                     {
-                        > 10 => "High",
-                        >= 5 => "Medium",
-                        _ => "Low"
+                        > 10 => "High Rotation",
+                        >= 5 => "Moderate",
+                        _ => "Low movement"
                     }
 
                     orderby rotationRate descending, distinctProductsCount descending, totalQty descending, location
@@ -264,6 +265,7 @@ public class LinqChallengeArchitectSet
                     {
                         WarehouseId = warehouseId,
                         Location = location,
+                        ShipmentCount = shipmentCount,
                         TotalQty = totalQty,
                         DistinctProductsCount = distinctProductsCount,
                         RotationRate = Math.Round(rotationRate, 2),
@@ -273,7 +275,7 @@ public class LinqChallengeArchitectSet
         foreach (var item in list)
         {
             WriteLine($"\nWarehouse {item.WarehouseId}\t\tat: {item.Location}\t\tRotation Tier: {item.RotationRateTier}");
-            WriteLine($"\tTotal Qty: {item.TotalQty}\t\tDistinct Products Count: {item.DistinctProductsCount}\t\tRotation Rate: {item.RotationRate}");
+            WriteLine($"\tShipments:{item.ShipmentCount}\t\tTotal Qty: {item.TotalQty}\t\tDistinct Products Count: {item.DistinctProductsCount}\t\tRotation Rate: {item.RotationRate}");
         }
     }
 

@@ -1,5 +1,4 @@
-﻿using LINQ_Challeges.Models;
-using static System.Console;
+﻿using static System.Console;
 
 namespace LINQ_Challenges;
 
@@ -76,8 +75,8 @@ public class LinqChallengeArchitectSet
     public LinqChallengeArchitectSet()
     {
         //HighestSpenders_T1();
-        HighValueOrders_T2();
-        //CategoryPerformance_T3();
+        //HighValueOrders_T2();
+        CategoryPerformance_T3();
         //WarehouseRotation_T4();
         //FraudDetection_T5();
         //PaginatedOrderHistory_T6();
@@ -186,7 +185,42 @@ public class LinqChallengeArchitectSet
     // Output: Category, AvgPrice, TotalQuantity, TotalEarning, OrderCount
     // Pagination: ❌ Not needed
     // Expected Time: 12–15 min
-    private void CategoryPerformance_T3() { }
+    // 4:08 - 4:22
+    private void CategoryPerformance_T3()
+    {
+        var query = (from orderItem in orderItems
+                     join prod in products on orderItem.ProductId equals prod.ProductId
+
+                     group new { orderItem, prod } by prod.Category into categoryGroup
+
+                     let category = categoryGroup.Key
+                     let avgPrice = categoryGroup.Average(x => x.prod.Price)
+                     let totalQtySold = categoryGroup.Sum(x => x.orderItem.Quantity)
+                     let totalEarning = categoryGroup.Sum(x => x.orderItem.Quantity * x.prod.Price)
+                     let orderCount = categoryGroup.Select(x => x.orderItem.OrderId).Distinct().Count()
+                     let avgPerOrder = totalEarning / orderCount
+                     let avgPricePerItem = totalEarning / totalQtySold
+
+                     orderby totalEarning descending, orderCount descending, totalQtySold descending, category
+
+                     select new
+                     {
+                         Category = category,
+                         OrderCount = orderCount,
+                         TotalQtySold = totalQtySold,
+                         AvgPrice = Math.Round(avgPrice, 2),
+                         TotalEarning = Math.Round(totalEarning, 2),
+                         AvgPerOrder = Math.Round(avgPerOrder, 2),
+                         AvgPricePerItem = Math.Round(avgPricePerItem, 2)
+                     }).ToList();
+
+        foreach (var item in query)
+        {
+            WriteLine($"\nCategory: {item.Category}");
+            WriteLine($"\tOrders: {item.OrderCount}\t\tTotal Quantity Sold: {item.TotalQtySold}");
+            WriteLine($"\tTotal Earning: ${item.TotalEarning}\t\tAvg Price: ${item.AvgPrice}\t\tAvg Per Order: ${item.AvgPerOrder}\t\tAvg Per Item: ${item.AvgPricePerItem}");
+        }
+    }
 
     // 🔹 Task 4: Warehouse Rotation Rate
     // Brief: Join shipments + products → group by warehouse → show rotation rate

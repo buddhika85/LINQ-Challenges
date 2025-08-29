@@ -77,8 +77,8 @@ public class LinqChallengeArchitectSet
         //HighestSpenders_T1();
         //HighValueOrders_T2();
         //CategoryPerformance_T3();
-        WarehouseRotation_T4();
-        //FraudDetection_T5();
+        //WarehouseRotation_T4();
+        FraudDetection_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
@@ -284,7 +284,52 @@ public class LinqChallengeArchitectSet
     // Output: CustomerId, Name, OrderCount, Min/Max Dates, Min/Max/Avg Amount
     // Pagination: ❌ Not needed
     // Expected Time: 10–12 min
-    private void FraudDetection_T5() { }
+    // 1:00 - 1:14
+    private void FraudDetection_T5()
+    {
+        var flaggedCustList = (from order in orders
+                               join fc in flaggedCustomerIds on order.CustomerId equals fc
+                               join customer in customers on fc equals customer.CustomerId
+
+                               group new { customer, order } by fc into fcGroup
+
+                               let customerId = fcGroup.Key
+                               let customer = fcGroup.Select(x => x.customer).FirstOrDefault()
+                               let orderCount = fcGroup.Count()
+                               let orders = fcGroup.Select(x => x.order)
+                               let minDate = orders.Min(x => x.OrderDate)
+                               let maxDate = orders.Max(x => x.OrderDate)
+
+                               let minAmount = orders.Min(x => x.Amount)
+                               let maxAmount = orders.Max(x => x.Amount)
+                               let avgAmount = orders.Average(x => x.Amount)
+                               let totalAmount = orders.Sum(x => x.Amount)
+
+                               orderby orderCount descending, maxDate descending, maxAmount descending, avgAmount descending, customer.Name
+
+                               select new
+                               {
+                                   CustomerId = customerId,
+                                   CustomerName = customer.Name,
+                                   IsPremiumStr = customer.IsPremium ? "Yes" : "No",
+                                   Customer = customer,
+                                   OrderCount = orderCount,
+                                   MinDate = minDate,
+                                   MaxDate = maxDate,
+                                   MinAmount = Math.Round(minAmount, 2),
+                                   MaxAmount = Math.Round(maxAmount, 2),
+                                   AvgAmount = Math.Round(avgAmount, 2),
+                                   TotalAmount = Math.Round(totalAmount, 2),
+                               }).ToList();
+
+        foreach (var item in flaggedCustList)
+        {
+            WriteLine($"\nCustomer ID: {item.CustomerId}\t\tName: {item.CustomerName}\t\tRegion: {item.Customer.Region}\t\tIs Premium: {item.IsPremiumStr}");
+            WriteLine($"Order count: {item.OrderCount}");
+            WriteLine($"Min Date: {item.MinDate.ToShortDateString()}\t\tMax Date: {item.MaxDate.ToShortDateString()}");
+            WriteLine($"Min Amount: ${item.MinAmount}\t\tMax Amount: ${item.MaxAmount}\t\tAvg Amount: ${item.AvgAmount}\t\tTotal Amount: ${item.TotalAmount}");
+        }
+    }
 
     // 🔹 Task 6: Paginated Order History
     // Brief: Show orders per customer → paginate 5 per page

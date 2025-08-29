@@ -291,10 +291,10 @@ public class LinqChallengeArchitectSet
                                join fc in flaggedCustomerIds on order.CustomerId equals fc
                                join customer in customers on fc equals customer.CustomerId
 
-                               group new { customer, order } by fc into fcGroup
+                               group new { order } by customer into fcGroup
 
-                               let customerId = fcGroup.Key
-                               let customer = fcGroup.Select(x => x.customer).FirstOrDefault()
+
+                               let customer = fcGroup.Key
                                let orderCount = fcGroup.Count()
                                let orders = fcGroup.Select(x => x.order)
                                let minDate = orders.Min(x => x.OrderDate)
@@ -309,11 +309,9 @@ public class LinqChallengeArchitectSet
 
                                select new
                                {
-                                   CustomerId = customerId,
-                                   CustomerName = customer.Name,
-                                   IsPremiumStr = customer.IsPremium ? "Yes" : "No",
                                    Customer = customer,
                                    OrderCount = orderCount,
+                                   IsPremiumStr = customer.IsPremium ? "Yes" : "No",
                                    MinDate = minDate,
                                    MaxDate = maxDate,
                                    MinAmount = Math.Round(minAmount, 2),
@@ -324,7 +322,7 @@ public class LinqChallengeArchitectSet
 
         foreach (var item in flaggedCustList)
         {
-            WriteLine($"\nCustomer ID: {item.CustomerId}\t\tName: {item.CustomerName}\t\tRegion: {item.Customer.Region}\t\tIs Premium: {item.IsPremiumStr}");
+            WriteLine($"\nCustomer ID: {item.Customer.CustomerId}\t\tName: {item.Customer.Name}\t\tRegion: {item.Customer.Region}\t\tIs Premium: {item.IsPremiumStr}");
             WriteLine($"Order count: {item.OrderCount}");
             WriteLine($"Min Date: {item.MinDate.ToShortDateString()}\t\tMax Date: {item.MaxDate.ToShortDateString()}");
             WriteLine($"Min Amount: ${item.MinAmount}\t\tMax Amount: ${item.MaxAmount}\t\tAvg Amount: ${item.AvgAmount}\t\tTotal Amount: ${item.TotalAmount}");

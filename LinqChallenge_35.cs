@@ -383,7 +383,7 @@ public class LinqChallengeArchitectSet
             WriteLine($"\n\nPage {++pageNum} of {totalPages}");
             foreach (var item in pagedResult)
             {
-                WriteLine($"\nCustomer ID: {item.Customer.CustomerId}\t\t{item.Customer}\t\t{item.Customer.Region}\t\t{item.IsPremiumStr}");
+                WriteLine($"\nCustomer ID: {item.Customer.CustomerId}\t\t{item.Customer.Name}\t\t{item.Customer.Region}\t\t{item.IsPremiumStr}");
                 WriteLine($"\tOrder Count: {item.OrderCount}\t\tCustomer Tier: {item.CustTier}");
                 WriteLine($"\tMin Order Date: {item.MinOrderDate.ToShortDateString()}\t\tMax Order Date: {item.MaxOrderDate.ToShortDateString()}");
                 WriteLine($"\tMin Amount: ${item.MinAmount}\t\tMax Amount: ${item.MaxAmount}\t\tAvg Amount: ${item.AvgAmount}");

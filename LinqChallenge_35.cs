@@ -1,4 +1,5 @@
-﻿using static System.Console;
+﻿using System.Collections.Generic;
+using static System.Console;
 
 namespace LINQ_Challenges;
 
@@ -334,7 +335,61 @@ public class LinqChallengeArchitectSet
     // Output: CustomerId, Name, OrderCount, Min/Max Dates, Min/Max/Sum Amount
     // Pagination: ✅ Yes
     // Expected Time: 12–15 min
-    private void PaginatedOrderHistory_T6() { }
+    // 8:28 - 8:45
+    private void PaginatedOrderHistory_T6()
+    {
+        var customerOrders = (from ord in orders
+                              join cust in customers on ord.CustomerId equals cust.CustomerId
+                              group ord by cust into orderGroup
+
+                              let customer = orderGroup.Key
+                              let orderCount = orderGroup.Count()
+                              let minOrderDate = orderGroup.Min(x => x.OrderDate)
+                              let maxOrderDate = orderGroup.Max(x => x.OrderDate)
+                              let minAmount = orderGroup.Min(x => x.Amount)
+                              let maxAmount = orderGroup.Max(x => x.Amount)
+                              let avgAmount = orderGroup.Average(x => x.Amount)
+
+                              let isPremiumStr = customer.IsPremium ? "Premimum Customer" : "Standard Customer"
+                              let custTier = avgAmount switch
+                              {
+                                  >= 1500 => "Very High Profit",
+                                  >= 1000 => "Profitable",
+                                  _ => "Standard"
+                              }
+
+                              orderby orderCount descending, maxAmount descending, avgAmount descending, maxOrderDate descending, customer.Name
+
+                              select new
+                              {
+                                  Customer = customer,
+                                  CustTier = custTier,
+                                  IsPremiumStr = isPremiumStr,
+                                  OrderCount = orderCount,
+                                  MinOrderDate = minOrderDate,
+                                  MaxOrderDate = maxOrderDate,
+                                  MinAmount = Math.Round(minAmount, 2),
+                                  MaxAmount = Math.Round(maxAmount, 2),
+                                  AvgAmount = Math.Round(avgAmount, 2),
+                              });
+
+        var perPage = 2;
+        var totalPages = Math.Ceiling(((float)customerOrders.Count()) / perPage);
+        for (var pageNum = 0; ;)
+        {
+            var pagedResult = customerOrders.Skip(pageNum * perPage).Take(perPage);
+            if (!pagedResult.Any())
+                break;
+            WriteLine($"\n\nPage {++pageNum} of {totalPages}");
+            foreach (var item in pagedResult)
+            {
+                WriteLine($"\nCustomer ID: {item.Customer.CustomerId}\t\t{item.Customer}\t\t{item.Customer.Region}\t\t{item.IsPremiumStr}");
+                WriteLine($"\tOrder Count: {item.OrderCount}\t\tCustomer Tier: {item.CustTier}");
+                WriteLine($"\tMin Order Date: {item.MinOrderDate.ToShortDateString()}\t\tMax Order Date: {item.MaxOrderDate.ToShortDateString()}");
+                WriteLine($"\tMin Amount: ${item.MinAmount}\t\tMax Amount: ${item.MaxAmount}\t\tAvg Amount: ${item.AvgAmount}");
+            }
+        }
+    }
 
     // 🔹 Task 7: Deferred Execution Trap
     // Brief: Show how modifying source after query affects results

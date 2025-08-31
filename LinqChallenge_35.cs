@@ -78,8 +78,8 @@ public class LinqChallengeArchitectSet
         //HighValueOrders_T2();
         //CategoryPerformance_T3();
         //WarehouseRotation_T4();
-        FraudDetection_T5();
-        //PaginatedOrderHistory_T6();
+        //FraudDetection_T5();
+        PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
         //ProductRecommendationGraph_T9();

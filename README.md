@@ -1,6 +1,6 @@
 # 🧠 Advanced LINQ Challenges in C#
 
-This repository contains a curated suite of LINQ exercises designed to push the boundaries of query composition, performance, and real-world applicability. Built entirely in **C#**, these challenges are ideal for developers preparing for **advanced technical interviews**, refining their **data manipulation skills**, or exploring **query optimization** in depth.
+This repository contains a curated suite of LINQ exercises designed to push the boundaries of query composition, performance, and real-world applicability. Built entirely in **C#**, these challenges are ideal for developers preparing for ** technical interviews**, refining their **data manipulation skills**, or exploring **query optimization** in depth.
 
 ---
 
@@ -56,7 +56,7 @@ Many exercises are designed to simulate **large datasets** and test LINQ’s beh
 
 This project is built for:
 
-- Interview preparation at senior and architect levels  
+- Interview preparation 
 - Deepening understanding of LINQ beyond surface syntax  
 - Practicing query logic that mirrors real-world enterprise scenarios  
 - Exploring how LINQ interacts with collections, databases, and APIs

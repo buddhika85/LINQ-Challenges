@@ -80,8 +80,8 @@ public class LinqChallengeArchitectSet
         //CategoryPerformance_T3();
         //WarehouseRotation_T4();
         //FraudDetection_T5();
-        PaginatedOrderHistory_T6();
-        //DeferredExecutionTrap_T7();
+        //PaginatedOrderHistory_T6();
+        DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
         //ProductRecommendationGraph_T9();
         //LogStreamAnalysis_T10();
@@ -396,7 +396,38 @@ public class LinqChallengeArchitectSet
     // Output: Demonstration of mutation visibility in deferred vs immediate execution
     // Pagination: ❌ Not applicable
     // Expected Time: 8–10 min
-    private void DeferredExecutionTrap_T7() { }
+    // 3:29 - 3:39
+    private void DeferredExecutionTrap_T7()
+    {
+        //var firstCustomerQuery = (from c in customers where c.CustomerId == 1 select c).AsQueryable();
+        ////  (1, "Alice", "NSW", true),
+
+        //var firstCustomer = customers.SingleOrDefault(x => x.CustomerId == 1);
+        //firstCustomer.IsPremium = false;
+        //firstCustomer.Name = "Alice ++";
+        //firstCustomer.Region = "nsw++";
+
+        //var firstCustomerFromQuery = firstCustomerQuery.ToList().First();
+        //WriteLine($"First Customer : {firstCustomerFromQuery.Name}, {firstCustomerFromQuery.Region}, {firstCustomerFromQuery.IsPremium}");
+
+        var nums = new List<int> { 1, 2, 3, 4 };
+        IEnumerable<int> evenNums = from num in nums
+                                    where num % 2 == 0
+                                    select num;
+        WriteLine("Even numbers exepcted are 2 and 4, but linq query is still not executed\n");
+
+        nums.Remove(2);
+        nums.Add(6);
+        WriteLine("source is modified to remove 2 and have 6, now deferred executing linq query\nand results are\n");
+
+        evenNums = evenNums.ToList();               // execute the linq query
+
+        foreach (var item in evenNums)
+        {
+            WriteLine(item);
+        }
+
+    }
 
     // 🔹 Task 8: Dynamic Customer Search
     // Brief: Build query dynamically using Expression<Func<T, bool>>

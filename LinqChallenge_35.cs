@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using static System.Console;
 
 namespace LINQ_Challenges;
@@ -81,8 +82,8 @@ public class LinqChallengeArchitectSet
         //WarehouseRotation_T4();
         //FraudDetection_T5();
         //PaginatedOrderHistory_T6();
-        DeferredExecutionTrap_T7();
-        //DynamicCustomerSearch_T8();
+        //DeferredExecutionTrap_T7();
+        DynamicCustomerSearch_T8();
         //ProductRecommendationGraph_T9();
         //LogStreamAnalysis_T10();
         //EfficientPagingBenchmark_T11();
@@ -426,7 +427,6 @@ public class LinqChallengeArchitectSet
         {
             WriteLine(item);
         }
-
     }
 
     // 🔹 Task 8: Dynamic Customer Search
@@ -434,7 +434,36 @@ public class LinqChallengeArchitectSet
     // Output: CustomerId, Name, Region (filtered dynamically)
     // Pagination: ❌ Optional
     // Expected Time: 15–18 min
-    private void DynamicCustomerSearch_T8() { }
+    // 9:50 - 10:00
+    private void DynamicCustomerSearch_T8()
+    {
+        Expression<Func<CustomerFilter35, bool>> nswPremiumCustomer = x => x.IsPremium && x.Region.Equals("nsw", StringComparison.OrdinalIgnoreCase);
+        foreach (var item in Filter(nswPremiumCustomer))
+        {
+            WriteLine($"{item.CustomerId}\t{item.Name}\t{item.IsPremium}\t{item.Region}");
+        }
+    }
+
+    class CustomerFilter35
+    {
+        public int CustomerId { get; set; }
+        public string Name { get; set; } = null!;
+        public string Region { get; set; } = null!;
+        public bool IsPremium { get; set; }
+    }
+
+    private IEnumerable<CustomerFilter35> Filter(Expression<Func<CustomerFilter35, bool>> expression)
+    {
+        var list = (from cust in customers
+                    select new CustomerFilter35
+                    {
+                        CustomerId = cust.CustomerId,
+                        IsPremium = cust.IsPremium,
+                        Region = cust.Region,
+                        Name = cust.Name,
+                    });
+        return list.Where(expression.Compile());
+    }
 
     // 🔹 Task 9: Product Recommendation Graph
     // Brief: Traverse productAdjacency graph → show related products

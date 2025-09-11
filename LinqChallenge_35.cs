@@ -83,14 +83,15 @@ public class LinqChallengeArchitectSet
         //FraudDetection_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
-        DynamicCustomerSearch_T8();
+        //DynamicCustomerSearch_T8();
+
         //ProductRecommendationGraph_T9();
         //LogStreamAnalysis_T10();
         //EfficientPagingBenchmark_T11();
         //SetTheoryChallenge_T12();
         //LeftJoinWithDefault_T13();
         //CrossJoinMatrix_T14();
-        //NestedProjectionChallenge_T15();
+        NestedProjectionChallenge_T15();
     }
 
     // 🔹 Task 1: Highest Spenders
@@ -512,5 +513,27 @@ public class LinqChallengeArchitectSet
     // Output: CustomerId, Name, Orders: [OrderId, Date, Amount]
     // Pagination: ❌ Optional
     // Expected Time: 15–18 min
-    private void NestedProjectionChallenge_T15() { }
+    // 5:05 - 5:13
+    private void NestedProjectionChallenge_T15()
+    {
+        var list = (from order in orders
+                    join
+                    cust in customers on order.CustomerId equals cust.CustomerId
+                    group order by cust into custGroup
+
+                    let customer = custGroup.Key
+                    let ordersCount = custGroup.Count()
+                    let maxOrderAmount = custGroup.Max(x => x.Amount)
+                    let minOrderAmount = custGroup.Max(x => x.Amount)
+                    let avgOrderAmount = custGroup.Max(x => x.Amount)
+                    let minOrderDate = custGroup.Min(x => x.OrderDate)
+                    let maxOrderDate = custGroup.Max(x => x.OrderDate)
+
+                    orderby avgOrderAmount descending, ordersCount descending, customer.Name
+
+                    select new
+                    {
+
+                    });
+    }
 }

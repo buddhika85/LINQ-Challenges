@@ -523,6 +523,7 @@ public class LinqChallengeArchitectSet
 
                     let customer = custGroup.Key
                     let ordersCount = custGroup.Count()
+                    let orders = custGroup.OrderByDescending(x => x.Amount)
                     let maxOrderAmount = custGroup.Max(x => x.Amount)
                     let minOrderAmount = custGroup.Min(x => x.Amount)
                     let avgOrderAmount = custGroup.Average(x => x.Amount)
@@ -535,6 +536,7 @@ public class LinqChallengeArchitectSet
                     {
                         Customer = customer,
                         OrdersCount = ordersCount,
+                        Orders = orders,
                         MaxOrderAmount = Math.Round(maxOrderAmount, 2),
                         MinOrderAmount = Math.Round(minOrderAmount, 2),
                         AvgOrderAmount = Math.Round(avgOrderAmount, 2),
@@ -554,6 +556,12 @@ public class LinqChallengeArchitectSet
             foreach (var item in pageItems)
             {
                 WriteLine($"\n{item.Customer.Name} with {item.OrdersCount} orders.");
+
+                foreach (var order in item.Orders)
+                {
+                    WriteLine($"\t\t\tOrder ID: {order.OrderId}\tDate: {order.OrderDate.ToShortDateString()}\tOrder Amount: ${order.Amount}");
+                }
+
                 WriteLine($"\tAmount Max: ${item.MaxOrderAmount}\tMin $:{item.MinOrderAmount}\tAvg: $:{item.AvgOrderAmount}");
                 WriteLine($"\tOrder Date Most Recent: {item.MaxOrderDate}\tOldest: {item.MinOrderDate}");
             }

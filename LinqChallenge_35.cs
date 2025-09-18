@@ -513,7 +513,7 @@ public class LinqChallengeArchitectSet
     // Output: CustomerId, Name, Orders: [OrderId, Date, Amount]
     // Pagination: ❌ Optional
     // Expected Time: 15–18 min
-    // 5:05 - 5:13
+    // 5:05 - 5:25 
     private void NestedProjectionChallenge_T15()
     {
         var list = (from order in orders
@@ -524,8 +524,8 @@ public class LinqChallengeArchitectSet
                     let customer = custGroup.Key
                     let ordersCount = custGroup.Count()
                     let maxOrderAmount = custGroup.Max(x => x.Amount)
-                    let minOrderAmount = custGroup.Max(x => x.Amount)
-                    let avgOrderAmount = custGroup.Max(x => x.Amount)
+                    let minOrderAmount = custGroup.Min(x => x.Amount)
+                    let avgOrderAmount = custGroup.Average(x => x.Amount)
                     let minOrderDate = custGroup.Min(x => x.OrderDate)
                     let maxOrderDate = custGroup.Max(x => x.OrderDate)
 
@@ -533,7 +533,30 @@ public class LinqChallengeArchitectSet
 
                     select new
                     {
+                        Customer = customer,
+                        OrdersCount = ordersCount,
+                        MaxOrderAmount = Math.Round(maxOrderAmount, 2),
+                        MinOrderAmount = Math.Round(minOrderAmount, 2),
+                        AvgOrderAmount = Math.Round(avgOrderAmount, 2),
+                        MinOrderDate = minOrderDate.ToShortDateString(),
+                        MaxOrderDate = maxOrderDate.ToShortDateString()
+                    }).ToList();
 
-                    });
+        var pageSize = 2;
+        var pages = (int)(Math.Ceiling((decimal)list.Count / pageSize));
+
+        for (var pageNum = 0; ;)
+        {
+            var pageItems = list.Skip(pageNum * pageSize).Take(pageSize);
+            if (!pageItems.Any()) break;
+            WriteLine($"\n\nPage[{++pageNum}] of {pages}");
+
+            foreach (var item in pageItems)
+            {
+                WriteLine($"\n{item.Customer.Name} with {item.OrdersCount} orders.");
+                WriteLine($"\tAmount Max: ${item.MaxOrderAmount}\tMin $:{item.MinOrderAmount}\tAvg: $:{item.AvgOrderAmount}");
+                WriteLine($"\tOrder Date Most Recent: {item.MaxOrderDate}\tOldest: {item.MinOrderDate}");
+            }
+        }
     }
 }

@@ -85,13 +85,13 @@ public class LinqChallengeArchitectSet
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
 
-        //ProductRecommendationGraph_T9();
+        ProductRecommendationGraph_T9();
         //LogStreamAnalysis_T10();
         //EfficientPagingBenchmark_T11();
         //SetTheoryChallenge_T12();
         //LeftJoinWithDefault_T13();
         //CrossJoinMatrix_T14();
-        NestedProjectionChallenge_T15();
+        //NestedProjectionChallenge_T15();
     }
 
     // 🔹 Task 1: Highest Spenders
@@ -471,7 +471,36 @@ public class LinqChallengeArchitectSet
     // Output: ProductId, Name, RecommendedProductIds, RecommendedNames
     // Pagination: ❌ Not needed
     // Expected Time: 18–22 min
-    private void ProductRecommendationGraph_T9() { }
+    // 9:35 AM - 9:52 AM
+    private void ProductRecommendationGraph_T9()
+    {
+        var productsDictionary = new Dictionary<int, (int ProductId, string Name, string Category, decimal Price)>();
+        products.ForEach(x =>
+        {
+            productsDictionary.Add(x.ProductId, x);
+        });
+
+        var productAdjDetails = from item in productAdjacency
+                                let product = productsDictionary.GetValueOrDefault(item.Key)
+                                let alsoBaughtList = (from id in item.Value orderby id select productsDictionary.GetValueOrDefault(id)).Where(x => !string.IsNullOrWhiteSpace(x.Name)).OrderByDescending(x => x.Price).ToList()
+                                orderby product.ProductId, product.Name
+                                select new
+                                {
+                                    Product = product,
+                                    AlsoBaughtList = alsoBaughtList
+                                };
+        foreach (var item in productAdjDetails)
+        {
+            WriteLine($"\nProduct ID {item.Product.ProductId} \tName {item.Product.Name} \tcategory: " +
+                $"{item.Product.Category}\t price ${Math.Round(item.Product.Price, 2)} Also baught: ");
+
+            foreach (var alsoBaughtItem in item.AlsoBaughtList)
+            {
+                WriteLine($"\t\tProduct ID {alsoBaughtItem.ProductId} \t Name {alsoBaughtItem.Name} \t category: " +
+                            $"{alsoBaughtItem.Category}\t price ${Math.Round(alsoBaughtItem.Price, 2)}");
+            }
+        }
+    }
 
     // 🔹 Task 10: Log Stream Analysis
     // Brief: Use Queue to analyze recent system events → group by type

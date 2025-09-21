@@ -85,8 +85,8 @@ public class LinqChallengeArchitectSet
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
 
-        ProductRecommendationGraph_T9();
-        //LogStreamAnalysis_T10();
+        //ProductRecommendationGraph_T9();
+        LogStreamAnalysis_T10();
         //EfficientPagingBenchmark_T11();
         //SetTheoryChallenge_T12();
         //LeftJoinWithDefault_T13();
@@ -507,7 +507,49 @@ public class LinqChallengeArchitectSet
     // Output: EventType, Count, Timestamp Range, Messages
     // Pagination: ❌ Optional (limit per type)
     // Expected Time: 10–12 min
-    private void LogStreamAnalysis_T10() { }
+    // 8:55 - 9:10
+    private void LogStreamAnalysis_T10()
+    {
+        var eventsByType = (from log in systemLogs
+                            group log by log.EventType into logGroup
+
+                            let count = logGroup.Count()
+                            let logs = logGroup.OrderBy(x => x.Timestamp).ThenBy(x => x.Message)
+                            let severityScore = logGroup.Key switch
+                            {
+                                "INFO" => 0,
+                                "WARN" => 1,
+                                "ERROR" => 2,
+                                _ => 0
+                            }
+
+                            let label = severityScore switch
+                            {
+                                1 => "Check Soon",
+                                2 => "Check Immediately",
+                                _ => "Check In Leisure"
+                            }
+
+                            orderby severityScore descending
+
+                            select new
+                            {
+                                EventType = logGroup.Key,
+                                Count = count,
+                                SeverityScore = severityScore,
+                                Label = label,
+                                Logs = logs
+                            }).ToList();
+
+        foreach (var item in eventsByType)
+        {
+            WriteLine($"\n{item.EventType}\tCount: {item.Count}\tSeverity Score:{item.SeverityScore}\tLabel: {item.Label}");
+            foreach (var log in item.Logs)
+            {
+                WriteLine($"\t\t{log.Timestamp}\t\t{log.Message}");
+            }
+        }
+    }
 
     // 🔹 Task 11: Efficient Paging Benchmark
     // Brief: Compare Skip/Take vs materialized paging for large datasets

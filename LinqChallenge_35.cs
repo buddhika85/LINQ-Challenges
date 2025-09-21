@@ -513,8 +513,10 @@ public class LinqChallengeArchitectSet
         var eventsByType = (from log in systemLogs
                             group log by log.EventType into logGroup
 
+
                             let count = logGroup.Count()
                             let logs = logGroup.OrderBy(x => x.Timestamp).ThenBy(x => x.Message)
+                            let timeRange = $"{logs.Min(x => x.Timestamp)} -> {logs.Max(x => x.Timestamp)}"
                             let severityScore = logGroup.Key switch
                             {
                                 "INFO" => 0,
@@ -527,7 +529,7 @@ public class LinqChallengeArchitectSet
                             {
                                 1 => "Check Soon",
                                 2 => "Check Immediately",
-                                _ => "Check In Leisure"
+                                _ => "Check at Leisure"
                             }
 
                             orderby severityScore descending
@@ -538,12 +540,14 @@ public class LinqChallengeArchitectSet
                                 Count = count,
                                 SeverityScore = severityScore,
                                 Label = label,
+                                TimeRange = timeRange,
                                 Logs = logs
                             }).ToList();
 
         foreach (var item in eventsByType)
         {
             WriteLine($"\n{item.EventType}\tCount: {item.Count}\tSeverity Score:{item.SeverityScore}\tLabel: {item.Label}");
+            WriteLine($"Time Range: {item.TimeRange}");
             foreach (var log in item.Logs)
             {
                 WriteLine($"\t\t{log.Timestamp}\t\t{log.Message}");

@@ -86,8 +86,8 @@ public class LinqChallengeArchitectSet
         //DynamicCustomerSearch_T8();
 
         //ProductRecommendationGraph_T9();
-        LogStreamAnalysis_T10();
-        //EfficientPagingBenchmark_T11();
+        //LogStreamAnalysis_T10();
+        EfficientPagingBenchmark_T11();
         //SetTheoryChallenge_T12();
         //LeftJoinWithDefault_T13();
         //CrossJoinMatrix_T14();
@@ -560,7 +560,13 @@ public class LinqChallengeArchitectSet
     // Output: PageNum, ItemsPerPage, QueryTime, ResultCount
     // Pagination: ✅ Yes
     // Expected Time: 15–20 min
-    private void EfficientPagingBenchmark_T11() { }
+    // 9:05
+    // Small, static data --> Materialized paging (ToList() then Skip/Take)
+    // Large, dynamic data --> Deferred execution (IQueryable.Skip/Take)
+    private void EfficientPagingBenchmark_T11()
+    {
+
+    }
 
     // 🔹 Task 12: Set Theory Challenge
     // Brief: Use Union, Intersect, Except to compare customer sets

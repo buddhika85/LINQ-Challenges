@@ -1,5 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq.Expressions;
+using System.Net.NetworkInformation;
+using System.Runtime.Intrinsics.X86;
 using static System.Console;
 
 namespace LINQ_Challenges;
@@ -555,6 +561,18 @@ public class LinqChallengeArchitectSet
         }
     }
 
+
+    class CustomerTest
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+
+        public override string ToString()
+        {
+            return $"{Id}\t{Name}";
+        }
+    }
+
     // 🔹 Task 11: Efficient Paging Benchmark
     // Brief: Compare Skip/Take vs materialized paging for large datasets
     // Output: PageNum, ItemsPerPage, QueryTime, ResultCount
@@ -563,9 +581,38 @@ public class LinqChallengeArchitectSet
     // 9:05
     // Small, static data --> Materialized paging (ToList() then Skip/Take)
     // Large, dynamic data --> Deferred execution (IQueryable.Skip/Take)
+
     private void EfficientPagingBenchmark_T11()
     {
+        var bigData = Enumerable.Range(1, 100000).Select(x => new CustomerTest { Id = x, Name = $"Test {x}" });
 
+        var perPage = 5;
+        var pageNeeded = 1500;
+
+        // Deffered Execution
+        var stopWatchDefferred = Stopwatch.StartNew();
+        var pagedResultDefferred = bigData.Skip(pageNeeded - 1 * perPage).Take(perPage);
+        stopWatchDefferred.Stop();
+
+
+        // Materialized Paging / Immediate Execution
+        var stopWatchImmediate = Stopwatch.StartNew();
+        var pagedResultImmediate = bigData.ToList().Skip(pageNeeded - 1 * perPage).Take(perPage);
+        stopWatchImmediate.Stop();
+
+        Display(pagedResultDefferred);
+        Display(pagedResultImmediate);
+
+        WriteLine($"Deffered Execution Elapsed Time: {stopWatchDefferred.ElapsedTicks} ms");
+        WriteLine($"Immediate Execution Elapsed Time: {stopWatchImmediate.ElapsedTicks} ms");
+    }
+
+    private void Display(IEnumerable<CustomerTest> pagedResult)
+    {
+        foreach (var item in pagedResult)
+        {
+            WriteLine(item);
+        }
     }
 
     // 🔹 Task 12: Set Theory Challenge

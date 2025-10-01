@@ -80,6 +80,57 @@ public class LinqChallengeArchitectSet
         [205] = new List<int> { 201 }       // Monitor → Laptop
     };
 
+
+
+    // 🔹 Task 12: Set Theory Challenge
+    // Brief: Use Union, Intersect, Except to compare customer sets
+    // Output: CustomerId, Name, MembershipStatus
+    // Pagination: ❌ Not needed
+    // Expected Time: 10–12 
+    private void SetTheoryChallenge_T12()
+    {
+        HashSet<(int CustomerId, string Name, string MembershipStatus)> customersWithOrders = (from ord in orders
+                                                                                               join cust in customers on ord.CustomerId equals cust.CustomerId
+                                                                                               select (
+                                                                                                   cust.CustomerId,
+                                                                                                   cust.Name,
+                                                                                                   cust.IsPremium ? "Premium" : "Standard"
+                                                                                               )).ToHashSet();
+        WriteLine("Customers with Orders");
+        Display(customersWithOrders);
+
+        var premiumCustomers = (from cust in customers
+                                where cust.IsPremium
+                                select (
+                                    cust.CustomerId,
+                                    cust.Name,
+                                    cust.IsPremium ? "Premium" : "Standard"
+                                )).ToHashSet();
+        WriteLine("\nPremium Customers");
+        Display(premiumCustomers);
+
+        var union = customersWithOrders.Union(premiumCustomers).ToHashSet();
+        WriteLine("\nCustomers with Orders Union Premium Customers");
+        Display(union);
+
+        var intersect = customersWithOrders.Intersect(premiumCustomers).ToHashSet();
+        WriteLine("\nPremium Customers with Orders - Intersect");
+        Display(intersect);
+
+        var except = customersWithOrders.Except(premiumCustomers).ToHashSet();
+        WriteLine("\nNon Premium Customers with Orders - Except");
+        Display(except);
+    }
+
+    private void Display(HashSet<(int CustomerId, string Name, string MembershipStatus)> customers)
+    {
+        foreach (var cust in customers)
+        {
+            WriteLine($"{cust.CustomerId}\t{cust.Name}\tMembershipStatus: {cust.MembershipStatus}");
+        }
+    }
+
+
     public LinqChallengeArchitectSet()
     {
         //HighestSpenders_T1();
@@ -93,8 +144,8 @@ public class LinqChallengeArchitectSet
 
         //ProductRecommendationGraph_T9();
         //LogStreamAnalysis_T10();
-        EfficientPagingBenchmark_T11();
-        //SetTheoryChallenge_T12();
+        //EfficientPagingBenchmark_T11();
+        SetTheoryChallenge_T12();
         //LeftJoinWithDefault_T13();
         //CrossJoinMatrix_T14();
         //NestedProjectionChallenge_T15();
@@ -614,13 +665,6 @@ public class LinqChallengeArchitectSet
             WriteLine(item);
         }
     }
-
-    // 🔹 Task 12: Set Theory Challenge
-    // Brief: Use Union, Intersect, Except to compare customer sets
-    // Output: CustomerId, Name, MembershipStatus
-    // Pagination: ❌ Not needed
-    // Expected Time: 10–12 min
-    private void SetTheoryChallenge_T12() { }
 
     // 🔹 Task 13: Left Join with DefaultIfEmpty()
     // Brief: Show customers with or without orders using left join

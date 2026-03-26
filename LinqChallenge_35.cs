@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Diagnostics;
-using System.Drawing;
 using System.Linq.Expressions;
-using System.Net.NetworkInformation;
-using System.Runtime.Intrinsics.X86;
 using static System.Console;
 
 namespace LINQ_Challenges;
@@ -145,8 +140,8 @@ public class LinqChallengeArchitectSet
         //ProductRecommendationGraph_T9();
         //LogStreamAnalysis_T10();
         //EfficientPagingBenchmark_T11();
-        SetTheoryChallenge_T12();
-        //LeftJoinWithDefault_T13();
+        //SetTheoryChallenge_T12();
+        LeftJoinWithDefault_T13();
         //CrossJoinMatrix_T14();
         //NestedProjectionChallenge_T15();
     }

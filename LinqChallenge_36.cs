@@ -1,0 +1,262 @@
+﻿namespace LINQ_Challeges;
+
+public class LinqChallenge_36
+{
+    // 🔹 Core Data Models
+    private List<(int CustomerId, string Name, string Region, bool IsPremium)> customers = new() {
+        (1, "Alice", "NSW", true),
+        (2, "Bob", "VIC", false),
+        (3, "Charlie", "QLD", true),
+        (4, "Diana", "NSW", false),
+        (5, "Ethan", "WA", true)
+    };
+    private List<(int OrderId, int CustomerId, DateTime OrderDate, decimal Amount)> orders = new(){
+        (101, 1, DateTime.Today.AddDays(-10), 1200),
+        (102, 1, DateTime.Today.AddDays(-5), 3800),
+        (103, 2, DateTime.Today.AddDays(-8), 600),
+        (104, 3, DateTime.Today.AddDays(-3), 5200),
+        (105, 4, DateTime.Today.AddDays(-1), 250),
+        (106, 5, DateTime.Today.AddDays(-2), 7000)
+    };
+    private List<(int ProductId, string Name, string Category, decimal Price)> products = new()
+    {
+        (201, "Laptop", "Electronics", 1500),
+        (202, "Phone", "Electronics", 800),
+        (203, "Desk", "Furniture", 300),
+        (204, "Chair", "Furniture", 150),
+        (205, "Monitor", "Electronics", 400)
+    };
+    private List<(int OrderId, int ProductId, int Quantity)> orderItems = new()
+    {
+        (101, 201, 1),
+        (101, 202, 2),
+        (102, 205, 3),
+        (103, 203, 1),
+        (104, 201, 2),
+        (104, 202, 1),
+        (105, 204, 1),
+        (106, 201, 1),
+        (106, 205, 2)
+    };
+    private List<(int WarehouseId, string Location)> warehouses = new()
+    {
+        (1, "Sydney"),
+        (2, "Melbourne")
+    };
+    private List<(int ShipmentId, int WarehouseId, int ProductId, DateTime Date, int Quantity)> shipments = new()
+    {
+        (301, 1, 201, DateTime.Today.AddDays(-7), 10),
+        (302, 1, 202, DateTime.Today.AddDays(-6), 15),
+        (303, 2, 203, DateTime.Today.AddDays(-5), 5),
+        (304, 2, 204, DateTime.Today.AddDays(-4), 8),
+        (305, 1, 205, DateTime.Today.AddDays(-3), 12)
+    };
+    private Queue<(DateTime Timestamp, string EventType, string Message)> systemLogs = new(new[]
+    {
+        (DateTime.Now.AddMinutes(-30), "INFO", "System started"),
+        (DateTime.Now.AddMinutes(-25), "WARN", "High memory usage"),
+        (DateTime.Now.AddMinutes(-20), "ERROR", "Unhandled exception"),
+        (DateTime.Now.AddMinutes(-15), "INFO", "Heartbeat OK"),
+        (DateTime.Now.AddMinutes(-10), "ERROR", "Database timeout"),
+        (DateTime.Now.AddMinutes(-5), "INFO", "User login success")
+    });
+    private HashSet<int> flaggedCustomerIds = new() { 1, 3, 5 };
+    private Dictionary<int, List<int>> productAdjacency = new()
+    {
+        [201] = new List<int> { 202, 205 }, // Laptop → Phone, Monitor
+        [202] = new List<int> { 201 },      // Phone → Laptop
+        [203] = new List<int> { 204 },      // Desk → Chair
+        [204] = new List<int> { 203 },      // Chair → Desk
+        [205] = new List<int> { 201 }       // Monitor → Laptop
+    };
+
+
+
+
+
+
+
+
+    public LinqChallenge_36()
+    {
+        HighestSpenders_T1();
+        HighValueOrders_T2();
+        CategoryPerformance_T3();
+        WarehouseRotation_T4();
+        FraudDetection_T5();
+        PaginatedOrderHistory_T6();
+        DeferredExecutionTrap_T7();
+        DynamicCustomerSearch_T8();
+
+        ProductRecommendationGraph_T9();
+        LogStreamAnalysis_T10();
+        EfficientPagingBenchmark_T11();
+        SetTheoryChallenge_T12();
+        LeftJoinWithDefault_T13();
+        CrossJoinMatrix_T14();
+        NestedProjectionChallenge_T15();
+    }
+
+    // 🔹 Task 1: Highest Spenders
+    // Brief: Group orders by customer → sum total spend → order descending
+    // Output: CustomerId, Name, OrderCount, TotalSpent, AvgSpentPerOrder
+    // Pagination: ❌ Not needed
+    // Expected Time: 10–12 min
+    // 9:32 - 9:46
+    private void HighestSpenders_T1()
+    {
+
+    }
+
+    // 🔹 Task 2: Orders Above $5000
+    // Brief: Join orders + items + products → filter orders with total > $5000
+    // Output: OrderId, CustomerName, TotalOrderValue, ItemCount, ProductCount
+    // Pagination: ❌ Not needed
+    // Expected Time: 15–18 min
+    // 9:28 - 9:46
+    private void HighValueOrders_T2()
+    {
+
+    }
+
+    // 🔹 Task 3: Category Performance
+    // Brief: Group by category → avg price, total quantity sold
+    // Output: Category, AvgPrice, TotalQuantity, TotalEarning, OrderCount
+    // Pagination: ❌ Not needed
+    // Expected Time: 12–15 min
+    // 4:08 - 4:22
+    private void CategoryPerformance_T3()
+    {
+
+    }
+
+    // 🔹 Task 4: Warehouse Rotation Rate
+    // Brief: Join shipments + products → group by warehouse → show rotation rate
+    // Output: WarehouseId, Location, TotalQuantity, DistinctProducts, RotationRate
+    // Pagination: ❌ Not needed
+    // Expected Time: 15–18 min
+    // 8:44 - 8:58
+    private void WarehouseRotation_T4()
+    {
+
+    }
+
+    // 🔹 Task 5: Fraud Detection
+    // Brief: Inner join orders with flaggedCustomerIds → show suspicious activity
+    // Output: CustomerId, Name, OrderCount, Min/Max Dates, Min/Max/Avg Amount
+    // Pagination: ❌ Not needed
+    // Expected Time: 10–12 min
+    // 1:00 - 1:14
+    private void FraudDetection_T5()
+    {
+
+    }
+
+    // 🔹 Task 6: Paginated Order History
+    // Brief: Show orders per customer → paginate 5 per page
+    // Output: CustomerId, Name, OrderCount, Min/Max Dates, Min/Max/Sum Amount
+    // Pagination: ✅ Yes
+    // Expected Time: 12–15 min
+    // 8:28 - 8:45
+    private void PaginatedOrderHistory_T6()
+    {
+
+    }
+
+    // 🔹 Task 7: Deferred Execution Trap
+    // Brief: Show how modifying source after query affects results
+    // Output: Demonstration of mutation visibility in deferred vs immediate execution
+    // Pagination: ❌ Not applicable
+    // Expected Time: 8–10 min
+    // 3:29 - 3:39
+    private void DeferredExecutionTrap_T7()
+    {
+
+    }
+
+    // 🔹 Task 8: Dynamic Customer Search
+    // Brief: Build query dynamically using Expression<Func<T, bool>>
+    // Output: CustomerId, Name, Region (filtered dynamically)
+    // Pagination: ❌ Optional
+    // Expected Time: 15–18 min
+    // 9:50 - 10:00
+    private void DynamicCustomerSearch_T8()
+    {
+
+    }
+
+
+
+    // 🔹 Task 9: Product Recommendation Graph
+    // Brief: Traverse productAdjacency graph → show related products
+    // Output: ProductId, Name, RecommendedProductIds, RecommendedNames
+    // Pagination: ❌ Not needed
+    // Expected Time: 18–22 min
+    // 9:35 AM - 9:52 AM
+    private void ProductRecommendationGraph_T9()
+    {
+
+    }
+
+    // 🔹 Task 10: Log Stream Analysis
+    // Brief: Use Queue to analyze recent system events → group by type
+    // Output: EventType, Count, Timestamp Range, Messages
+    // Pagination: ❌ Optional (limit per type)
+    // Expected Time: 10–12 min
+    // 8:55 - 9:10
+    private void LogStreamAnalysis_T10()
+    {
+
+    }
+
+
+
+    // 🔹 Task 11: Efficient Paging Benchmark
+    // Brief: Compare Skip/Take vs materialized paging for large datasets
+    // Output: PageNum, ItemsPerPage, QueryTime, ResultCount
+    // Pagination: ✅ Yes
+    // Expected Time: 15–20 min
+    // 9:05
+    // Small, static data --> Materialized paging (ToList() then Skip/Take)
+    // Large, dynamic data --> Deferred execution (IQueryable.Skip/Take)
+
+    private void EfficientPagingBenchmark_T11()
+    {
+    }
+
+    // 🔹 Task 12: Set Theory Challenge
+    // Brief: Use Union, Intersect, Except to compare customer sets
+    // Output: CustomerId, Name, MembershipStatus
+    // Pagination: ❌ Not needed
+    // Expected Time: 10–12 
+    private void SetTheoryChallenge_T12()
+    {
+
+    }
+
+
+    // 🔹 Task 13: Left Join with DefaultIfEmpty()
+    // Brief: Show customers with or without orders using left join
+    // Output: CustomerId, Name, OrderCount, LastOrderDate
+    // Pagination: ❌ Not needed
+    // Expected Time: 12–15 min
+    private void LeftJoinWithDefault_T13() { }
+
+    // 🔹 Task 14: Cross Join Matrix
+    // Brief: Generate all combinations of customers and products
+    // Output: CustomerId, ProductId, CustomerName, ProductName
+    // Pagination: ❌ Optional
+    // Expected Time: 10–12 min
+    private void CrossJoinMatrix_T14() { }
+
+    // 🔹 Task 15: Nested Projection Challenge
+    // Brief: Group orders by customer → project nested order summaries
+    // Output: CustomerId, Name, Orders: [OrderId, Date, Amount]
+    // Pagination: ❌ Optional
+    // Expected Time: 15–18 min
+    // 5:05 - 5:25 
+    private void NestedProjectionChallenge_T15()
+    {
+
+    }
+}

@@ -60,7 +60,9 @@ public class Program
         //new LinqChallenge_33();
         //new LinqChallenge_34();
 
-        new LinqChallengeArchitectSet();
+        //new LinqChallengeArchitectSet();
+
+        new LinqChallenge_36();
     }
 
 

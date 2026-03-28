@@ -80,21 +80,21 @@ public class LinqChallenge_36
     public LinqChallenge_36()
     {
         HighestSpenders_T1();
-        HighValueOrders_T2();
-        CategoryPerformance_T3();
-        WarehouseRotation_T4();
-        FraudDetection_T5();
-        PaginatedOrderHistory_T6();
-        DeferredExecutionTrap_T7();
-        DynamicCustomerSearch_T8();
+        //HighValueOrders_T2();
+        //CategoryPerformance_T3();
+        //WarehouseRotation_T4();
+        //FraudDetection_T5();
+        //PaginatedOrderHistory_T6();
+        //DeferredExecutionTrap_T7();
+        //DynamicCustomerSearch_T8();
 
-        ProductRecommendationGraph_T9();
-        LogStreamAnalysis_T10();
-        EfficientPagingBenchmark_T11();
-        SetTheoryChallenge_T12();
-        LeftJoinWithDefault_T13();
-        CrossJoinMatrix_T14();
-        NestedProjectionChallenge_T15();
+        //ProductRecommendationGraph_T9();
+        //LogStreamAnalysis_T10();
+        //EfficientPagingBenchmark_T11();
+        //SetTheoryChallenge_T12();
+        //LeftJoinWithDefault_T13();
+        //CrossJoinMatrix_T14();
+        //NestedProjectionChallenge_T15();
     }
 
     // 🔹 Task 1: Highest Spenders
@@ -102,10 +102,43 @@ public class LinqChallenge_36
     // Output: CustomerId, Name, OrderCount, TotalSpent, AvgSpentPerOrder
     // Pagination: ❌ Not needed
     // Expected Time: 10–12 min
-    // 9:32 - 9:46
+    // 10:23 - 10:37
     private void HighestSpenders_T1()
     {
+        var result = (from customer in customers
+                      join
+                      order in orders on customer.CustomerId equals order.CustomerId
+                      group new { order, customer } by customer.CustomerId into customerGroup
+                      let name = customerGroup.Select(x => x.customer).FirstOrDefault().Name ?? "Unknown"
+                      let orderCount = customerGroup.Count()
+                      let totalSpent = (double)customerGroup.Sum(x => x.order.Amount)
+                      let avgSpentPerOrder = orderCount > 0 ? Math.Round((totalSpent / orderCount), 2) : 0.0
 
+                      orderby totalSpent descending, avgSpentPerOrder descending, orderCount descending, name
+
+                      select new
+                      {
+                          CustomerId = customerGroup.Key,
+                          Name = name,
+                          OrderCount = orderCount,
+                          TotalSpent = totalSpent,
+                          AvgSpentPerOrder = avgSpentPerOrder
+                      });
+
+        var perPage = 2;
+        var pageCount = Math.Ceiling((float)result.Count() / perPage);
+        for (var pageNum = 0; ;)
+        {
+            var pagedResult = result.Skip(pageNum * perPage).Take(perPage);
+            if (!pagedResult.Any())
+                return;
+            Console.WriteLine($"\nPage: {++pageNum}");
+
+            foreach (var item in pagedResult)
+            {
+                Console.WriteLine($"ID: {item.CustomerId}\tName: {item.Name}\tOrders: {item.OrderCount}\tTotal Spent: ${item.TotalSpent}\tAvg Per Order: ${item.AvgSpentPerOrder}");
+            }
+        }
     }
 
     // 🔹 Task 2: Orders Above $5000

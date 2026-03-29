@@ -79,8 +79,8 @@ public class LinqChallenge_36
 
     public LinqChallenge_36()
     {
-        HighestSpenders_T1();
-        //HighValueOrders_T2();
+        //HighestSpenders_T1();
+        HighValueOrders_T2();
         //CategoryPerformance_T3();
         //WarehouseRotation_T4();
         //FraudDetection_T5();
@@ -141,15 +141,55 @@ public class LinqChallenge_36
         }
     }
 
-    // 🔹 Task 2: Orders Above $5000
-    // Brief: Join orders + items + products → filter orders with total > $5000
+    // 🔹 Task 2: Orders Above $100
+    // Brief: Join orders + items + products → filter orders with total > $100
     // Output: OrderId, CustomerName, TotalOrderValue, ItemCount, ProductCount
     // Pagination: ❌ Not needed
     // Expected Time: 15–18 min
-    // 9:28 - 9:46
+    // 7:17 - 7:34
     private void HighValueOrders_T2()
     {
+        var query = from order in orders
+                    join orderItem in orderItems on order.OrderId equals orderItem.OrderId
+                    join product in products on orderItem.ProductId equals product.ProductId
+                    group new { order, orderItem, product } by order.OrderId into orderGroup
 
+                    let orderInfo = orderGroup.Select(x => x.order).First()
+                    let customerName = customers.FirstOrDefault(x => x.CustomerId == orderInfo.CustomerId).Name
+                    let totalValue = orderGroup.Sum(x => x.product.Price * x.orderItem.Quantity)
+                    let productsCount = orderGroup.Select(x => x.product.ProductId).Distinct().Count()
+                    let itemCount = orderGroup.Sum(x => x.orderItem.Quantity)
+                    let orderLinesCount = orderGroup.Select(x => x.orderItem).Distinct().Count()
+
+                    where totalValue > 100
+
+                    orderby totalValue descending, itemCount descending, customerName                  
+
+                    select new 
+                    {
+                        orderInfo.OrderId,
+                        CustomerName = customerName,
+                        TotalValue = Math.Round(totalValue, 2),
+                        ItemCount = itemCount,
+                        ProductsCount = productsCount,
+                        OrderLinesCount = orderLinesCount
+                    };
+
+        var perPage = 2;
+        var pageNum = 0;
+        var pageCount = Math.Ceiling((float)query.Count() / perPage);
+        while(pageNum < pageCount)
+        {
+            var pagedResult = query.Skip(pageNum * perPage).Take(perPage);
+            if (!pagedResult.Any())
+                return;
+            Console.WriteLine($"\nPage: {++pageNum}");
+            foreach (var item in pagedResult)
+            {
+                Console.WriteLine($"Order Id: {item.OrderId}\tCustomer: {item.CustomerName}\tTotal Order Value: ${item.TotalValue}\tItem Count: {item.ItemCount}" +
+                    $"\tProduct Count: {item.ProductsCount}\tOrder Lines Count: {item.OrderLinesCount}");
+            }
+        }
     }
 
     // 🔹 Task 3: Category Performance

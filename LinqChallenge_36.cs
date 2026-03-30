@@ -80,8 +80,8 @@ public class LinqChallenge_36
     public LinqChallenge_36()
     {
         //HighestSpenders_T1();
-        HighValueOrders_T2();
-        //CategoryPerformance_T3();
+        //HighValueOrders_T2();
+        CategoryPerformance_T3();
         //WarehouseRotation_T4();
         //FraudDetection_T5();
         //PaginatedOrderHistory_T6();
@@ -197,10 +197,70 @@ public class LinqChallenge_36
     // Output: Category, AvgPrice, TotalQuantity, TotalEarning, OrderCount
     // Pagination: ❌ Not needed
     // Expected Time: 12–15 min
-    // 4:08 - 4:22
+    // 6:51 - 7:06
     private void CategoryPerformance_T3()
     {
+        //var query = from product in products
+        //            join orderItems in orderItems on product.ProductId equals orderItems.ProductId
+        //            group new { product, orderItems } by product.Category into categoryGroup
 
+        //            let category = categoryGroup.Key
+        //            let avgPrice = Math.Round(categoryGroup.Select(x => x.product).Average(x => x.Price), 2)
+        //            let totalQuantity = categoryGroup.Select(x => x.orderItems).Sum(x => x.Quantity)
+        //            let totalEarned = Math.Round(categoryGroup.Sum(x => x.product.Price * x.orderItems.Quantity), 2)
+        //            let orderCount = categoryGroup.Select(x => x.orderItems.OrderId).Distinct().Count()
+
+        //            orderby totalEarned descending, totalQuantity descending, orderCount descending, catetory
+
+        //            select new
+        //            {
+        //                Category = category,
+        //                AvgPrice = avgPrice,
+        //                TotalQuantity = totalQuantity, 
+        //                TotalEarned = totalEarned, 
+        //                OrderCount = orderCount
+        //            };
+
+        /*
+         Category: Electronics   Avg Price: $985.71      Total Quantity: 12      Total Earned: $10400    Order count: 4
+Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $450      Order count: 2
+         */
+
+        var query = products
+                           .Join(orderItems,
+                               product => product.ProductId,
+                               orderItem => orderItem.ProductId,
+                               (product, orderItem) => new { product, orderItem })
+                           .GroupBy(x => x.product.Category)
+                           .Select(g => new
+                           {
+                               Category = g.Key,
+                               AvgPrice = Math.Round(g.Average(x => x.product.Price), 2),
+                               TotalQuantity = g.Sum(x => x.orderItem.Quantity),
+                               TotalEarned = Math.Round(g.Sum(x => x.product.Price * x.orderItem.Quantity), 2),
+                               OrderCount = g.Select(x => x.orderItem.OrderId).Distinct().Count()
+                           })
+                           .OrderByDescending(x => x.TotalEarned)
+                           .ThenByDescending(x => x.TotalQuantity)
+                           .ThenByDescending(x => x.OrderCount)
+                           .ThenBy(x => x.Category);
+
+        var perPage = 2;
+        var pageCount = Math.Ceiling((float)query.Count() / perPage);
+        var pagedShowed = 0;
+
+        while(pagedShowed < pageCount)
+        {
+            var pagedResult = query.Skip(pagedShowed * perPage).Take(perPage);
+            if (!pagedResult.Any())
+                return;
+
+            Console.WriteLine($"Page [{++pagedShowed}]");
+            foreach (var item in pagedResult)
+            {
+                Console.WriteLine($"Category: {item.Category}\tAvg Price: ${item.AvgPrice}\tTotal Quantity: {item.TotalQuantity}\tTotal Earned: ${item.TotalEarned}\tOrder count: {item.OrderCount}");
+            }
+        }
     }
 
     // 🔹 Task 4: Warehouse Rotation Rate

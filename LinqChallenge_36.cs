@@ -1,4 +1,6 @@
-﻿namespace LINQ_Challeges;
+﻿using System.Text.RegularExpressions;
+
+namespace LINQ_Challeges;
 
 public class LinqChallenge_36
 {
@@ -70,19 +72,12 @@ public class LinqChallenge_36
         [205] = new List<int> { 201 }       // Monitor → Laptop
     };
 
-
-
-
-
-
-
-
     public LinqChallenge_36()
     {
         //HighestSpenders_T1();
         //HighValueOrders_T2();
-        CategoryPerformance_T3();
-        //WarehouseRotation_T4();
+        //CategoryPerformance_T3();
+        WarehouseRotation_T4();
         //FraudDetection_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
@@ -268,10 +263,79 @@ Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $4
     // Output: WarehouseId, Location, TotalQuantity, DistinctProducts, RotationRate
     // Pagination: ❌ Not needed
     // Expected Time: 15–18 min
-    // 8:44 - 8:58
+    // 6:44 - 7:01
+    /*
+        Warehouse ID: 1 Location: Sydney        Total Quantity: 37      Rotational Rate: 12.33  Rotational Label: High
+        Warehouse ID: 2 Location: Melbourne     Total Quantity: 13      Rotational Rate: 6.5    Rotational Label: Moderate
+     */
     private void WarehouseRotation_T4()
     {
+        var query = from shipment in shipments
+                    join product in products on shipment.ProductId equals product.ProductId
+                    join warehouse in warehouses on shipment.WarehouseId equals warehouse.WarehouseId
+                    group new { shipment, product } by warehouse into warehouseGroup
 
+                    let warehouseId = warehouseGroup.Key.WarehouseId
+                    let location = warehouseGroup.Key.Location
+                    let totalQty = warehouseGroup.Sum(x => x.shipment.Quantity)
+                    let productCount = warehouseGroup.Select(x => x.product).Distinct().Count()
+                    let rotationalRate = productCount > 0 ? Math.Round((float)totalQty / productCount, 2) : 0.0
+                    let rotationalLabel = rotationalRate switch
+                    {
+                        >= 10 => "High",
+                        >= 5 => "Moderate",
+                        _ => "Low"
+                    }
+
+                    orderby rotationalRate descending, location
+                    select new
+                    {
+                        WarehouseId = warehouseId,
+                        Location = location,
+                        TotalQuantity = totalQty,
+                        RotationalRate = rotationalRate,
+                        RotationalLabel = rotationalLabel
+                    };
+
+        // same as above using method syntax
+        var query2 = shipments.Join(products,
+                        shipment => shipment.ProductId,
+                        product => product.ProductId,
+                        (shipment, product) => new { shipment, product }).Join(warehouses,
+                                                                                shipProduct => shipProduct.shipment.WarehouseId,
+                                                                                warehouse => warehouse.WarehouseId,
+                                                                                (shipProduct, warehouse) => new { shipProduct.product, shipProduct.shipment, warehouse })
+                        .GroupBy(x => x.warehouse)
+                        .Select(group =>
+                        {
+                            var warehouseId = group.Key.WarehouseId;
+                            var location = group.Key.Location;
+                            var totalQty = group.Sum(x => x.shipment.Quantity);
+                            var productCount = group.Select(x => x.product).Distinct().Count();
+                            var rotationRate = productCount > 0 ? Math.Round((float)totalQty / productCount, 2) : 0.0;
+                            var rotationalLabel = rotationRate switch
+                            {
+                                >= 10 => "High",
+                                >= 5 => "Moderate",
+                                _ => "Low"
+                            };
+                            return new
+                            {
+                                WarehouseId = warehouseId,
+                                Location = location,
+                                TotalQuantity = totalQty,
+                                ProductCount = productCount,
+                                RotationalRate = rotationRate,
+                                RotationalLabel = rotationalLabel
+                            };
+                        });
+
+
+
+        foreach (var item in query2)
+        {
+            Console.WriteLine($"Warehouse ID: {item.WarehouseId}\tLocation: {item.Location}\tTotal Quantity: {item.TotalQuantity}\tRotational Rate: {item.RotationalRate}\tRotational Label: {item.RotationalLabel}");
+        }
     }
 
     // 🔹 Task 5: Fraud Detection

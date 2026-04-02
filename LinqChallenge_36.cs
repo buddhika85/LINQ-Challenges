@@ -338,6 +338,11 @@ Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $4
         }
     }
 
+    /*
+        ID: 1   Name: Alice     OrderCount: 2   Mindate: 23/03/2026     MaxDate: 28/03/2026             MinAmount: $1200       MaxAmount: $3800         AvgAmount: $2500
+        ID: 5   Name: Ethan     OrderCount: 1   Mindate: 31/03/2026     MaxDate: 31/03/2026             MinAmount: $7000       MaxAmount: $7000         AvgAmount: $7000
+        ID: 3   Name: Charlie   OrderCount: 1   Mindate: 30/03/2026     MaxDate: 30/03/2026             MinAmount: $5200       MaxAmount: $5200         AvgAmount: $5200     
+     */
     // 🔹 Task 5: Fraud Detection
     // Brief: Inner join orders with flaggedCustomerIds → show suspicious activity
     // Output: CustomerId, Name, OrderCount, Min/Max Dates, Min/Max/Avg Amount
@@ -346,40 +351,77 @@ Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $4
     // 6:47 - 7:01
     private void FraudDetection_T5()
     {
-        var query = from customer in customers 
-                    join order in orders on customer.CustomerId equals order.CustomerId
+        //var query = from customer in customers 
+        //            join order in orders on customer.CustomerId equals order.CustomerId
 
-                    where flaggedCustomerIds.Contains(customer.CustomerId)
+        //            where flaggedCustomerIds.Contains(customer.CustomerId)
 
-                    group order by customer into orderGroup
+        //            group order by customer into orderGroup
                     
-                    let customerId = orderGroup.Key.CustomerId
-                    let name = orderGroup.Key.Name
-                    let orderCount = orderGroup.Count()
+        //            let customerId = orderGroup.Key.CustomerId
+        //            let name = orderGroup.Key.Name
+        //            let orderCount = orderGroup.Count()
 
-                    let orderDates = orderGroup.Select(x => x.OrderDate)
-                    let minDate = orderDates.Min().ToShortDateString()
-                    let maxDate = orderDates.Max().ToShortDateString()
+        //            let orderDates = orderGroup.Select(x => x.OrderDate)
+        //            let minDate = orderDates.Min().ToShortDateString()
+        //            let maxDate = orderDates.Max().ToShortDateString()
 
-                    let minAmount = Math.Round(orderGroup.Min(x => x.Amount), 2)
-                    let maxAmount = Math.Round(orderGroup.Max(x => x.Amount), 2)
-                    let avgAmount = Math.Round(orderGroup.Average(x => x.Amount), 2)
+        //            let minAmount = Math.Round(orderGroup.Min(x => x.Amount), 2)
+        //            let maxAmount = Math.Round(orderGroup.Max(x => x.Amount), 2)
+        //            let avgAmount = Math.Round(orderGroup.Average(x => x.Amount), 2)
 
-                    orderby orderCount descending, avgAmount descending, name
+        //            orderby orderCount descending, avgAmount descending, name
 
-                    select new
-                    {
-                        CustomerId = customerId, 
-                        Name = name,
-                        OrderCount = orderCount, 
-                        Mindate = minDate,
-                        MaxDate = maxDate,
-                        MinAmount = minAmount, 
-                        MaxAmount = maxAmount, 
-                        AvgAmount = avgAmount,
-                    };
+        //            select new
+        //            {
+        //                CustomerId = customerId, 
+        //                Name = name,
+        //                OrderCount = orderCount, 
+        //                Mindate = minDate,
+        //                MaxDate = maxDate,
+        //                MinAmount = minAmount, 
+        //                MaxAmount = maxAmount, 
+        //                AvgAmount = avgAmount,
+        //            };
 
-        foreach (var item in query)
+
+        var query2 = customers.Join(orders,
+                            customer => customer.CustomerId,
+                            order => order.CustomerId,
+                            (customer, order) => new { customer, order })
+                            .Where(x => flaggedCustomerIds.Contains(x.customer.CustomerId))
+                            .GroupBy(x => x.customer)
+                            .Select(orderGroup =>
+                            {
+                                var customerId = orderGroup.Key.CustomerId;
+                                var name = orderGroup.Key.Name;
+                                var orderCount = orderGroup.Count();
+
+                                var orderDates = orderGroup.Select(x => x.order.OrderDate);
+                                var minDate = orderDates.Min().ToShortDateString();
+                                var maxDate = orderDates.Max().ToShortDateString();
+
+                                var minAmount = Math.Round(orderGroup.Min(x => x.order.Amount), 2);
+                                var maxAmount = Math.Round(orderGroup.Max(x => x.order.Amount), 2);
+                                var avgAmount = Math.Round(orderGroup.Average(x => x.order.Amount), 2);
+
+                                return new
+                                {
+                                    CustomerId = customerId,
+                                    Name = name,
+                                    OrderCount = orderCount,
+                                    Mindate = minDate,
+                                    MaxDate = maxDate,
+                                    MinAmount = minAmount,
+                                    MaxAmount = maxAmount,
+                                    AvgAmount = avgAmount,
+                                };
+                            })
+                            .OrderByDescending(x => x.OrderCount)
+                            .ThenByDescending(x => x.AvgAmount)
+                            .ThenBy(x => x.Name);
+
+        foreach (var item in query2)
         {
             Console.WriteLine($"ID: {item.CustomerId}\tName: {item.Name}\tOrderCount: {item.OrderCount}\tMindate: {item.Mindate}\tMaxDate: {item.MaxDate}" +
                 $"\t\tMinAmount: ${item.MinAmount}\t\tMaxAmount: ${item.MaxAmount}\t\tAvgAmount: ${item.AvgAmount}");

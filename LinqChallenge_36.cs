@@ -77,8 +77,8 @@ public class LinqChallenge_36
         //HighestSpenders_T1();
         //HighValueOrders_T2();
         //CategoryPerformance_T3();
-        WarehouseRotation_T4();
-        //FraudDetection_T5();
+        //WarehouseRotation_T4();
+        FraudDetection_T5();
         //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
@@ -343,10 +343,47 @@ Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $4
     // Output: CustomerId, Name, OrderCount, Min/Max Dates, Min/Max/Avg Amount
     // Pagination: ❌ Not needed
     // Expected Time: 10–12 min
-    // 1:00 - 1:14
+    // 6:47 - 7:01
     private void FraudDetection_T5()
     {
+        var query = from customer in customers 
+                    join order in orders on customer.CustomerId equals order.CustomerId
 
+                    where flaggedCustomerIds.Contains(customer.CustomerId)
+
+                    group order by customer into orderGroup
+                    
+                    let customerId = orderGroup.Key.CustomerId
+                    let name = orderGroup.Key.Name
+                    let orderCount = orderGroup.Count()
+
+                    let orderDates = orderGroup.Select(x => x.OrderDate)
+                    let minDate = orderDates.Min().ToShortDateString()
+                    let maxDate = orderDates.Max().ToShortDateString()
+
+                    let minAmount = Math.Round(orderGroup.Min(x => x.Amount), 2)
+                    let maxAmount = Math.Round(orderGroup.Max(x => x.Amount), 2)
+                    let avgAmount = Math.Round(orderGroup.Average(x => x.Amount), 2)
+
+                    orderby orderCount descending, avgAmount descending, name
+
+                    select new
+                    {
+                        CustomerId = customerId, 
+                        Name = name,
+                        OrderCount = orderCount, 
+                        Mindate = minDate,
+                        MaxDate = maxDate,
+                        MinAmount = minAmount, 
+                        MaxAmount = maxAmount, 
+                        AvgAmount = avgAmount,
+                    };
+
+        foreach (var item in query)
+        {
+            Console.WriteLine($"ID: {item.CustomerId}\tName: {item.Name}\tOrderCount: {item.OrderCount}\tMindate: {item.Mindate}\tMaxDate: {item.MaxDate}" +
+                $"\t\tMinAmount: ${item.MinAmount}\t\tMaxAmount: ${item.MaxAmount}\t\tAvgAmount: ${item.AvgAmount}");
+        }
     }
 
     // 🔹 Task 6: Paginated Order History

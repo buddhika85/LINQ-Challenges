@@ -78,8 +78,8 @@ public class LinqChallenge_36
         //HighValueOrders_T2();
         //CategoryPerformance_T3();
         //WarehouseRotation_T4();
-        FraudDetection_T5();
-        //PaginatedOrderHistory_T6();
+        //FraudDetection_T5();
+        PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
 
@@ -429,14 +429,50 @@ Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $4
     }
 
     // 🔹 Task 6: Paginated Order History
-    // Brief: Show orders per customer → paginate 5 per page
+    // Brief: Show orders per customer → paginate 2 per page
     // Output: CustomerId, Name, OrderCount, Min/Max Dates, Min/Max/Sum Amount
     // Pagination: ✅ Yes
     // Expected Time: 12–15 min
-    // 8:28 - 8:45
+    // 4:52 - 5:09PM
     private void PaginatedOrderHistory_T6()
     {
+        var query = from order in orders
+                    join cust in customers on order.CustomerId equals cust.CustomerId
+                    group order by cust into custGroup
 
+                    let name = custGroup.Key.Name
+                    let orderCount = custGroup.Count()
+                    let minDate = custGroup.Min(x => x.OrderDate)
+                    let maxDate = custGroup.Max(x => x.OrderDate)
+                    let sumAmount = Math.Round(custGroup.Sum(x => x.Amount), 2)
+
+                    orderby sumAmount descending, orderCount descending, maxDate descending, name
+
+                    select new
+                    {
+                        CustomerId = custGroup.Key.CustomerId,
+                        Name = name,
+                        OrderCount = orderCount,
+                        MinDate = minDate,
+                        MaxDate = maxDate,
+                        SumAmount = sumAmount,
+                    };
+
+        var list = query.ToList();
+
+        var perPage = 2;
+        var pageCount = Math.Ceiling((float)list.Count / perPage);
+        var pageNum = 0;
+        while (pageNum < pageCount)
+        {
+            var pagedItems = list.Skip(pageNum * perPage).Take(perPage);
+            Console.WriteLine($"\n[Page: {++pageNum} of {pageCount}]");
+            foreach (var customer in pagedItems)
+            {
+                Console.WriteLine($"Customer ID: {customer.CustomerId}\tName: {customer.Name}\tOrders count: {customer.OrderCount}\t" +
+                    $"Min Date: {customer.MinDate.ToShortDateString()}\tMax Date: {customer.MaxDate.ToShortDateString()}\tSum Amount: {customer.SumAmount}");
+            }
+        }
     }
 
     // 🔹 Task 7: Deferred Execution Trap

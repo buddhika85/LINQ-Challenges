@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 
 namespace LINQ_Challeges;
 
@@ -79,11 +80,11 @@ public class LinqChallenge_36
         //CategoryPerformance_T3();
         //WarehouseRotation_T4();
         //FraudDetection_T5();
-        PaginatedOrderHistory_T6();
+        //PaginatedOrderHistory_T6();
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
 
-        //ProductRecommendationGraph_T9();
+        ProductRecommendationGraph_T9();
         //LogStreamAnalysis_T10();
         //EfficientPagingBenchmark_T11();
         //SetTheoryChallenge_T12();
@@ -504,10 +505,64 @@ Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $4
     // Output: ProductId, Name, RecommendedProductIds, RecommendedNames
     // Pagination: ❌ Not needed
     // Expected Time: 18–22 min
-    // 9:35 AM - 9:52 AM
+    // 6:49 - 7:05 
     private void ProductRecommendationGraph_T9()
     {
+        // single query to get all current products - will not execute for each query
+        Dictionary<int, string> productsLookup = products.ToDictionary(x => x.ProductId, x => x.Name);
+        var result = (from prodAdj in productAdjacency
 
+                      let name = productsLookup.GetValueOrDefault(prodAdj.Key, "Unknown")
+                      let adjecentProducts = prodAdj.Value.Select(x => new { Id = x, Name =  productsLookup.GetValueOrDefault(x, "Unknown")})
+                      let Ids = string.Join(",", adjecentProducts.Select(x => x.Id))
+                      let Names = string.Join(",", adjecentProducts.Select(x => x.Name))
+                     select new
+                     {
+                         ProductId = prodAdj.Key,
+                         Name = name,
+                         RecommendedProductIds = $"[{Ids}]",
+                         RecommendedNames = $"[{Names}]"
+                     }).ToList();
+
+        foreach (var item in result)
+        {
+            Console.WriteLine($"ProductId: {item.ProductId}\tName: {item.Name}\tRecommendedProductIds: {item.RecommendedProductIds}\tRecommendedNames: {item.RecommendedNames}");
+        }
+    }
+
+    private void ProductRecommendationGraph_T9_solution()
+    {
+        var productMap = products.ToDictionary(p => p.ProductId);
+
+        var result =
+            productAdjacency
+                .Select(adj =>
+                {
+                    var product = productMap.GetValueOrDefault(adj.Key);
+                    var adjSet = adj.Value.ToHashSet();
+
+                    var related = products
+                        .Where(p => adjSet.Contains(p.ProductId))
+                        .ToList();
+
+                    return new
+                    {
+                        ProductId = adj.Key,
+                        Name = product.Name ?? "Unknown",
+                        RecommendedProductIds = related.Select(r => r.ProductId).ToList(),
+                        RecommendedNames = related.Select(r => r.Name ?? "Unknown").ToList()
+                    };
+                })
+                .ToList();
+
+        foreach (var item in result)
+        {
+            Console.WriteLine(
+                $"ProductId: {item.ProductId}\t" +
+                $"Name: {item.Name}\t" +
+                $"RecommendedProductIds: [{string.Join(",", item.RecommendedProductIds)}]\t" +
+                $"RecommendedNames: [{string.Join(",", item.RecommendedNames)}]");
+        }
     }
 
     // 🔹 Task 10: Log Stream Analysis

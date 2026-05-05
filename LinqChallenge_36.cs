@@ -84,8 +84,8 @@ public class LinqChallenge_36
         //DeferredExecutionTrap_T7();
         //DynamicCustomerSearch_T8();
 
-        ProductRecommendationGraph_T9();
-        //LogStreamAnalysis_T10();
+        //ProductRecommendationGraph_T9();
+        LogStreamAnalysis_T10();
         //EfficientPagingBenchmark_T11();
         //SetTheoryChallenge_T12();
         //LeftJoinWithDefault_T13();

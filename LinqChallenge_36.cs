@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace LINQ_Challeges;
@@ -570,10 +571,32 @@ Category: Furniture     Avg Price: $225 Total Quantity: 2       Total Earned: $4
     // Output: EventType, Count, Timestamp Range, Messages
     // Pagination: ❌ Optional (limit per type)
     // Expected Time: 10–12 min
-    // 8:55 - 9:10
+    // 6:55 - 7:07
     private void LogStreamAnalysis_T10()
     {
+        var groupedLogs = from log in systemLogs
+                          group log by log.EventType into logTypeGroup
 
+                          let logCount = logTypeGroup.Count()
+                          let minTimeStamp = logTypeGroup.MinBy(x => x.Timestamp)
+                          let maxTimeStamp = logTypeGroup.MaxBy(x => x.Timestamp)
+                          let messages = logTypeGroup.OrderBy(x => x.Timestamp).Select(x => x.Message).ToList()
+
+                          orderby logCount descending, maxTimeStamp descending 
+
+                          select new
+                          {
+                              EventType = logTypeGroup.Key,
+                              Count = logCount,
+                              TimeStampRange = $"{minTimeStamp} to {maxTimeStamp}",
+                              Messages = messages
+                          };
+
+        foreach (var item in groupedLogs)
+        {
+            Console.WriteLine($"{item.EventType}\t{item.Count} Logs\t{item.TimeStampRange} Times\t");
+            Console.WriteLine("\t" + string.Join(Environment.NewLine + "\t", item.Messages));
+        }
     }
 
 
